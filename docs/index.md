@@ -1,6 +1,6 @@
 # Documentation home
 
-> **You are here:** **Docs home** → [How Molecule works](./concepts/how-molecule-works.md) → [Pre-flight](./preflight.md) → [Install](./install/index.md) → [Quickstart](./quickstart.md)
+> **You are here:** **Docs home** → [How Molecule works](./concepts/how-molecule-works.md) → [Pre-flight](./preflight.md) → [Install](./install/index.md) → [Quickstart](./quickstart.md) → [The demo](./demo.md)
 
 **What you will be able to do:** find the one page that answers your question, from any page,
 in one click.
@@ -83,6 +83,7 @@ for when something has already gone wrong, not steps you walk in order.
 | **Here to fix something that broke.** | [Troubleshooting](./troubleshooting.md) |
 | **Here to test a role that manages a service.** | [systemd in containers](./systemd-in-containers.md) |
 | **Here to build a scenario for your own role or collection.** | [Build your own workflows](./authoring/index.md) |
+| **Here to watch it work before reading any of it.** | [The demo](./demo.md) — 1 min 54 s, a real recorded run, annotated beat by beat. |
 
 ---
 
@@ -95,6 +96,7 @@ for when something has already gone wrong, not steps you walk in order.
 | [How Molecule works](./concepts/how-molecule-works.md) | The mental model: what each step of a test does, how Molecule reaches your container, and what it does not do. No commands. | beginner |
 | [Glossary](./glossary.md) | Every word this site uses, defined in one or two sentences. | beginner · reference |
 | [Pre-flight check](./preflight.md) | One read-only script that tells you in ten seconds whether this machine can run Molecule, Podman and systemd — and which check to fix. | beginner |
+| [The demo](./demo.md) | The 1 min 54 s recording, embedded and annotated: six beats, the real transcript quoted, and an explicit list of what it does **not** show. | beginner |
 | [Quickstart](./quickstart.md) | Your first green `molecule test`, in about 15 minutes *(unmeasured estimate)*, copy-paste. | beginner |
 
 **Install** — pick your platform, every command verified against a package manager
@@ -149,6 +151,7 @@ for when something has already gone wrong, not steps you walk in order.
 |---|---|
 | [`examples/quickstart/`](../examples/quickstart/) | The toolchain works. Copy, write a file, assert on it. |
 | [`examples/systemd-unit/`](../examples/systemd-unit/) | `systemd` is PID 1 in a rootless container and a unit the test installed is active. |
+| [`examples/demo/`](../examples/demo/) | The recording pipeline behind [the demo](./demo.md): the GIF, the asciicast, the transcript, and how to re-record it. |
 | [`examples/VERIFICATION.md`](../examples/VERIFICATION.md) | The transcripts from those runs, and **every defect they found in these docs** — read it before trusting a config. |
 
 **Maintainer documents** — how this site is built, and the one true copy of every config
@@ -183,6 +186,7 @@ Then, when you want to test your own work: **[Build your own workflows](./author
 | If you want to… | Go to |
 |---|---|
 | **install on my operating system** | [Install index](./install/index.md) — then [Fedora](./install/fedora.md) · [Ubuntu](./install/ubuntu.md) · [Arch](./install/arch.md) · [macOS](./install/macos.md) · [Mageia](./install/mageia.md) |
+| **see it work before I read anything** | [The demo](./demo.md) — a 1 min 54 s recording of a real run, annotated, with the transcript quoted |
 | **get my first test to pass** | [Quickstart](./quickstart.md) |
 | **understand systemd in a container** | [systemd in containers](./systemd-in-containers.md) |
 | **test my own role** | [Authoring: your first scenario](./authoring/your-first-scenario.md) |
@@ -213,6 +217,7 @@ Two real projects on disk, both executed end to end on real hardware. From a cop
 |---|---|---|
 | [`examples/quickstart/`](../examples/quickstart/) | `cd examples/quickstart && molecule test` | The toolchain works: create a container, write a file, assert on it, destroy the container. |
 | [`examples/systemd-unit/`](../examples/systemd-unit/) | `cd examples/systemd-unit && molecule test` | `systemd` is PID 1 in a rootless Podman container, and a `.service` unit the test installed is active. |
+| [`examples/demo/demo.gif`](../examples/demo/demo.gif) | watch it inline | Both of the above, recorded live: 866 × 534 px, 1 min 54 s, rendered by Pillow from a real session. [Annotated walkthrough →](./demo.md) |
 
 Both were run on Fedora 44 with rootless Podman, SELinux enforcing, cgroup v2, Molecule
 `26.9.0` and `ansible-core` `2.21.4`. **The transcripts are real, and

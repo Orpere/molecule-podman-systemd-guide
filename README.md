@@ -4,6 +4,15 @@
 Fedora, Ubuntu, Arch, macOS or Mageia, for free. Written for someone who has never used
 Molecule, Podman or Ansible.**
 
+![Animated terminal recording of this project's demo on Fedora 44: a real `molecule test` run with rootless Podman 5.8.7 and Molecule 26.9.0. It shows the pre-flight check reporting ready with one informational warning, `molecule --version` and the driver list including `podman`, the four keys in `molecule.yml` that make systemd PID 1, the verify recap reporting `ok=7` alongside `systemd is PID 1.` and `molecule-demo.service is active.`, a plain `podman run --systemd=always` container reporting `running`, the same container re-run with `--privileged` reporting `degraded`, and cleanup leaving no containers behind.](examples/demo/demo.gif)
+
+*The 866×534 animated GIF above is 1 min 54 s. Every command in it was really executed, on a
+real machine, and the captions are drawn from the output the tools actually printed — not
+re-typeset afterwards. The
+[six-beat caption](#the-demo-in-six-beats) is below; the
+[full annotated walkthrough](docs/demo.md) quotes the transcript line by line, and
+[how the recording works](#regenerating-the-demo) is explained further down.*
+
 [![Ansible](assets/badges/badge-ansible.svg)](https://docs.ansible.com/)
 [![systemd](assets/badges/badge-systemd.svg)](https://systemd.io/)
 [![CNCF](assets/badges/badge-cncf.svg)](https://www.cncf.io/)
@@ -17,31 +26,7 @@ Molecule, Podman or Ansible.**
 
 ---
 
-```mermaid
-flowchart LR
-  R["your Ansible role"] --> S["Molecule scenario"]
-  S -->   P["container, systemd is PID 1"]
-  P --> V["verify.yml asserts it works"]
-  V --> D["container destroyed"]
-```
-
-**What this shows:** one `molecule test` run takes your Ansible role, puts it in a disposable
-scenario, runs it inside a Podman container in which `systemd` is the first process, asserts
-the result, and throws the container away.
-
-A text description of the diagram, in reading order, for anyone who cannot see it. It starts on
-the left with the thing you already have: an Ansible role, playbook or collection. That feeds
-into a *Molecule scenario*, which is a folder holding your settings and your playbooks — the
-unit of work you are about to build. The scenario tells Podman to start a container from an
-image in which `systemd` is the very first process, so the container behaves like a real Linux
-machine rather than a bare process sandbox. Inside it, your role is applied. Then `verify.yml`
-runs your own assertions — is the service active, is the file there, is the port listening.
-That is the step that decides pass or fail. Finally the container is destroyed, so nothing is
-left behind and the next run starts from scratch.
-
----
-
-## Why this guide exists
+## What problem this solves
 
 You will find a lot of Molecule tutorials on the internet. Most of them are wrong about the
 things that matter, in three specific ways: they were written for a version of Molecule that
@@ -64,6 +49,32 @@ examples on real hardware, and it says out loud where the folklore is and why it
 The full, evidence-backed list of eight myths is in
 **[systemd in containers](docs/systemd-in-containers.md)**, and there is a
 [one-paragraph summary](docs/troubleshooting.md) in the troubleshooting reference.
+
+---
+
+## How one test run works
+
+```mermaid
+flowchart LR
+  R["your Ansible role"] --> S["Molecule scenario"]
+  S -->   P["container, systemd is PID 1"]
+  P --> V["verify.yml asserts it works"]
+  V --> D["container destroyed"]
+```
+
+**What this shows:** one `molecule test` run takes your Ansible role, puts it in a disposable
+scenario, runs it inside a Podman container in which `systemd` is the first process, asserts
+the result, and throws the container away.
+
+A text description of the diagram, in reading order, for anyone who cannot see it. It starts on
+the left with the thing you already have: an Ansible role, playbook or collection. That feeds
+into a *Molecule scenario*, which is a folder holding your settings and your playbooks — the
+unit of work you are about to build. The scenario tells Podman to start a container from an
+image in which `systemd` is the very first process, so the container behaves like a real Linux
+machine rather than a bare process sandbox. Inside it, your role is applied. Then `verify.yml`
+runs your own assertions — is the service active, is the file there, is the port listening.
+That is the step that decides pass or fail. Finally the container is destroyed, so nothing is
+left behind and the next run starts from scratch.
 
 ---
 
@@ -98,6 +109,37 @@ subject — and the part most guides get wrong.
 > every play reporting `no hosts matched`. It happened to us, and it is why
 > [this page explains it](docs/concepts/how-molecule-works.md#10-verify). The one-second habit that
 > catches it is in [the troubleshooting reference](docs/troubleshooting.md).
+
+---
+
+## The demo in six beats
+
+The GIF at the top of this page is the demo. It is 1 min 54 s. This is what you are watching,
+in order — the full annotated version, with the real transcript, is in
+**[docs/demo.md](docs/demo.md)**.
+
+1. **Pre-flight.** `bash docs/scripts/molecule-preflight.sh` checks the seven things the host
+   must already be doing right — cgroup v2, rootless Podman, `subuid`/`subgid`, SELinux, Python
+   3.10+, Molecule, the `podman` driver. The run ends in
+   `RESULT: READY WITH WARNINGS - 1 warning(s), no hard failures`. The one warning is that
+   `containers.podman` is not installed yet, which `molecule test` fixes for you during its
+   `dependency` step.
+2. **The toolchain.** `molecule --version` and `molecule drivers`. The second one is the point:
+   the `podman` driver is not in Molecule, it comes from the separate `molecule-plugins` package.
+   If `podman` is not in that list, nothing works.
+3. **The crux.** The four keys in `molecule.yml` that turn an ordinary container into one whose
+   first process is `systemd`: `command: /sbin/init`, `override_command: true`,
+   `systemd: always`, plus `groups: [molecule]` — the line almost every tutorial forgets, and
+   the one that decides whether your test asserts anything.
+4. **The run.** `molecule test` in `examples/systemd-unit/`. The two lines the whole exercise
+   exists to produce: `systemd is PID 1.` and `molecule-demo.service is active.`
+5. **The non-vacuity check.** The verify recap reads `instance : ok=7 … failed=0`, and there is
+   no `no hosts matched` anywhere. This is the site's signature lesson: a green exit code does
+   not prove your assertions ran. `ok=7`, not `ok=0`.
+6. **The myth, and the cleanup.** The same container run by hand with
+   `podman run --systemd=always` reports `running`. Run it again with `--privileged` and it
+   reports `degraded` — you weakened the sandbox and broke the init system. Then
+   `molecule destroy`, and `podman ps -a` prints its header row and nothing else.
 
 ---
 
@@ -148,9 +190,7 @@ Two runnable projects you can execute right now, without writing anything:
 [`examples/quickstart/`](examples/quickstart/) and
 [`examples/systemd-unit/`](examples/systemd-unit/).
 
----
-
-## What you can build here
+### What you can build here
 
 | Example | What it proves | Run it |
 |---|---|---|
@@ -176,6 +216,11 @@ with the assertions actually running — verified by the `ok=` count in the veri
 the exit code. That run also confirmed the cgroup v2 and SELinux claims on
 [the systemd page](docs/systemd-in-containers.md), and the pre-flight script in
 `docs/scripts/molecule-preflight.sh` was executed on the same host in both states.
+
+> **The platform caveat that matters.** *Every* transcript, version number and screenshot in this
+> repository — including the demo GIF at the top of this page — comes from that single
+> **Fedora 44, x86-64** run. The other four platforms are documented from package metadata and
+> upstream sources, not filmed. Treat the Fedora path as measured and the rest as researched.
 
 **And that run found seven real bugs in this documentation**, which are now fixed. We are naming
 them because a guide that hides its own errors is not telling you the truth about its accuracy.
@@ -241,10 +286,14 @@ Foundation.** The Molecule logo, where used, is displayed unmodified under CC BY
 Apple graphic and no Fedora Infinity logo appears anywhere in this repository — see
 [`assets/ATTRIBUTION.md`](assets/ATTRIBUTION.md) for the decisions and the reasons.
 
+The demo recording shows only this project's own command output. It contains no third-party
+logo, no Apple graphic and no Fedora mark; the terminal text is the property of whatever tool
+printed it, and every tool shown is free and open source.
+
 ### Contributing
 
-There is no contribution process yet, and inventing one would be worse than saying so. What is
-true today:
+There is no contribution process yet, and inventing one would be worse than saying so. What
+is true today:
 
 - **Every page is written from a rule set**, and the rules are public: the information
   architecture in [`docs/STRUCTURE.md`](docs/STRUCTURE.md) and the graphics contract in
@@ -259,11 +308,42 @@ true today:
 
 ---
 
+## Regenerating the demo
+
+The GIF is produced by [`examples/demo/record.py`](examples/demo/record.py), and the whole
+pipeline is documented in [`examples/demo/README.md`](examples/demo/README.md).
+
+```bash
+python3 examples/demo/record.py            # record for real, render, write all three artefacts
+python3 examples/demo/record.py --check    # record only, print the transcript, write no GIF
+python3 examples/demo/record.py --reuse    # re-render from cached frames, without re-running
+```
+
+Three properties make the recording trustworthy rather than decorative:
+
+- **It is not hand-animated.** `record.py` runs every command for real in a pty, and the callout
+  cards pull their lines out of the captured output. If a claim stops being true, the card goes
+  empty instead of lying.
+- **It is recorded from a `git clone` at a neutral path** — `/tmp/molecule-demo-home/proj` —
+  not from a checkout, so the video can never show the recording machine's home directory or
+  username. A leak check in `record.py` **refuses to write the GIF** if either reaches the
+  frames. Because it runs from a clone, the video also always shows the *committed* state, so
+  it cannot drift from what a reader downloads.
+- **It is rendered by Pillow alone.** No asciinema, no ffmpeg, no headless browser, no network.
+  Pillow is free and open source.
+
+The full transcript of the recording in this repository is
+[`examples/demo/demo.txt`](examples/demo/demo.txt) — 33 KB of exact terminal output, greppable
+and quotable. That is where every quoted line in this repository's documentation comes from.
+
+---
+
 ## Next
 
 - **Never used Ansible before?** → [Docs home](docs/index.md), then
   [the quickstart](docs/quickstart.md).
 - **Already installed?** → [Quickstart](docs/quickstart.md) — your first green test, about 15
   minutes, $0.
+- **Want to watch it first?** → [The demo, annotated](docs/demo.md).
 - **Something is broken?** → [Troubleshooting](docs/troubleshooting.md).
 - **A word you do not know?** → [Glossary](docs/glossary.md).

@@ -39,7 +39,7 @@
 | **W6** Your own workflows + CI | `docs/authoring/index.md`, `docs/authoring/your-first-scenario.md`, `docs/authoring/project-layout.md`, `docs/authoring/writing-tests.md`, `docs/authoring/custom-images.md`, `docs/authoring/multi-scenario.md`, `docs/authoring/ci.md` | 7 |
 | **W7** Troubleshooting + FAQ + glossary | `docs/troubleshooting.md`, `docs/faq.md`, `docs/glossary.md` | 3 |
 | **D1 (architect, not a writer)** | `docs/STRUCTURE.md`, `docs/REFERENCE-CONFIG.md`, `docs/VISUAL-SYSTEM.md` | 3 |
-| **E1 (examples agent)** | `examples/quickstart/`, `examples/systemd-unit/`, `examples/multi-scenario/` | 3 trees |
+| **E1 (examples agent)** | `examples/quickstart/`, `examples/systemd-unit/`, `examples/multi-scenario/`, `examples/demo/` | 4 trees |
 | **B1 (graphics agent)** | `assets/icons/`, `assets/diagrams/`, `assets/ATTRIBUTION.md` | — |
 | **V1 (lint gate)** | validates every page | — |
 
@@ -70,6 +70,7 @@ docs/
     mageia.md
     rootless-podman.md                        ← the one shared Linux chore
   quickstart.md                               ← first scenario, no image build
+  demo.md                                    ← the recorded demo, embedded and annotated
   systemd-in-containers.md                    ← THE crux
   usage.md                                    ← the day-to-day commands
   authoring/
@@ -90,12 +91,13 @@ examples/
   quickstart/                                 ← runnable, exit 0
   systemd-unit/                               ← runnable, exit 0
   multi-scenario/                             ← runnable, exit 0
+  demo/                                       ← the recording pipeline (GIF + cast + txt + 2 scripts)
 assets/
   ATTRIBUTION.md
   icons/    diagrams/
 ```
 
-**28 doc pages + README + 3 example trees.** Rationale for the shape:
+**29 doc pages + README + 4 example trees.** Rationale for the shape:
 
 - **`concepts/` before `install/`.** A reader who has never used Ansible needs to know what
   "converge" and "verify" mean *before* they are told to install four tools. Rejected: putting
@@ -105,6 +107,12 @@ assets/
   divergence. Rejected: 5 self-contained platform pages.
 - **`systemd-in-containers.md` is a single page, not split.** `PLAN.md` puts it on the critical
   path. Splitting the crux page across two files guarantees the reader misses the warning.
+- **`demo.md` is a page, not an asset.** The GIF is the asset; the page around it is what makes
+  it a lesson. A bare animation proves a run happened. The page is where the six beats are named,
+  where the transcript is quoted, and — the reason it earns its place in the tree — where the
+  **"what the demo does not show"** section lives. A demo that only shows its successes teaches
+  the reader to trust videos. The page is linked from `README.md`, `docs/index.md` and
+  `examples/README.md`; it is not an orphan, and it has outgoing links in every beat.
 - **`reference/` is a separate tier** so the narrative pages can link "full option list here"
   instead of inlining 200 lines of driver docstring.
 - **No `docs/mkdocs.yml`.** The site is the repository as rendered by GitHub. `docs/index.md`
@@ -1066,6 +1074,7 @@ Legend for target reader: **B** = beginner (never used Ansible) · **I** = inter
 | `examples/quickstart/` | E1 | The toolchain works; `molecule test` exits 0. No systemd. | `README.md`, `docs/quickstart.md`, `docs/authoring/your-first-scenario.md` | `docs/quickstart.md` |
 | `examples/systemd-unit/` | E1 | systemd is PID 1, a test unit is active, `verify-systemd` passes. | `docs/systemd-in-containers.md`, `docs/authoring/writing-tests.md` | `docs/systemd-in-containers.md` |
 | `examples/multi-scenario/` | E1 | Two scenarios, `--scenario-name`, the `group_vars` trap avoided. | `docs/authoring/multi-scenario.md` | `docs/authoring/multi-scenario.md` |
+| `examples/demo/` | E1 | That the six claims in `docs/demo.md` are backed by a real session. Ships `demo.gif` (866×534, 248 frames, ~1 min 54 s, 2.1 MB), `demo.cast` (asciicast v2, 52 KB), `demo.txt` (the exact 33 KB transcript), plus `record.py` and `steps.py`. | `README.md`, `docs/demo.md`, `docs/index.md` | `docs/demo.md` |
 
 Each example tree contains a `README.md` with: what it proves, the exact command, the expected
 final line, the expected exit code, and a `## Troubleshooting` line pointing at
@@ -1177,6 +1186,7 @@ State this on `README.md` so people know it is a bounded commitment.
 | `docs/install/mageia.md` | `install/index`, `preflight` | `install/rootless-podman`, `preflight`, `quickstart`, `troubleshooting` | No | No |
 | `docs/install/rootless-podman.md` | `index`, all 4 Linux install pages, `troubleshooting` | `preflight`, `troubleshooting`, `quickstart`, `glossary` | No | No |
 | `docs/quickstart.md` | `README`, `index`, all 6 install pages, `concepts`, `usage` | `systemd-in-containers`, `usage`, `authoring/index`, `concepts`, `troubleshooting`, `glossary` | No | No |
+| `docs/demo.md` | `README`, `index`, `examples/demo/README.md`, `examples/README.md` | `preflight`, `install/index`, `install/macos`, `install/rootless-podman`, `systemd-in-containers`, `quickstart`, `troubleshooting`, `authoring/index`, `authoring/multi-scenario`, `authoring/custom-images`, `reference/cli`, `reference/molecule-yml`, `REFERENCE-CONFIG`, `STRUCTURE`, `glossary`, `examples/systemd-unit`, `examples/multi-scenario`, `examples/demo`, `examples/VERIFICATION`, `README` | No | No |
 | `docs/systemd-in-containers.md` | `README`, `index`, `quickstart`, `install/macos`, `authoring/custom-images` | `authoring/custom-images`, `authoring/writing-tests`, `quickstart`, `usage`, `troubleshooting`, `glossary`, `reference/molecule-yml` | No | No |
 | `docs/usage.md` | `README`, `index`, `quickstart`, `systemd-in-containers`, `authoring/*` | `reference/cli`, `reference/molecule-yml`, `reference/env-vars`, `authoring/index`, `troubleshooting` | No | No |
 | `docs/authoring/index.md` | `index`, `quickstart`, `systemd-in-containers`, `usage`, `reference/molecule-yml` | 6 sub-pages, `troubleshooting`, `faq`, `examples/multi-scenario` | No | No |
@@ -1194,9 +1204,10 @@ State this on `README.md` so people know it is a bounded commitment.
 | `examples/quickstart/` | `README`, `quickstart`, `authoring/your-first-scenario` | `quickstart` | No | No |
 | `examples/systemd-unit/` | `systemd-in-containers`, `writing-tests`, `authoring/ci` | `systemd-in-containers` | No | No |
 | `examples/multi-scenario/` | `authoring/multi-scenario` | `authoring/multi-scenario` | No | No |
+| `examples/demo/` | `README`, `docs/demo.md`, `docs/index.md`, `examples/README.md` | `docs/demo.md`, `README`, `docs/install/index.md` | No | No |
 | `assets/ATTRIBUTION.md` | `README`, `VISUAL-SYSTEM`, every page displaying a mark (R12) | `VISUAL-SYSTEM`, brand policies | No | No |
 
-**Result: 0 orphans, 0 dead ends, across 31 linkable units.** The table is the proof — every row
+**Result: 0 orphans, 0 dead ends, across 33 linkable units.** The table is the proof — every row
 has a non-empty "linked from" and a non-empty "links out".
 
 **How V1 re-checks this mechanically** (do not re-derive by hand):
@@ -1223,6 +1234,9 @@ has a non-empty "linked from" and a non-empty "links out".
 | install on **macOS** | `docs/install/macos.md` |
 | install on **Mageia** | `docs/install/mageia.md` |
 | set up rootless containers (Linux) | `docs/install/rootless-podman.md` |
+| watch it work before reading anything | `docs/demo.md` |
+| check whether a green run was real | `docs/demo.md` §5 · `docs/troubleshooting.md` §1 |
+| re-record the demo | `examples/demo/README.md` |
 | get my first test to pass | `docs/quickstart.md` |
 | understand systemd inside a container | `docs/systemd-in-containers.md` |
 | find out why `degraded` is fine | `docs/systemd-in-containers.md` §10 · `docs/troubleshooting.md` §3 |

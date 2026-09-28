@@ -1,7 +1,8 @@
 # `examples/` — runnable, verified examples
 
 Three real, on-disk Molecule projects (`systemd-unit/`, `quickstart/`, and the two-scenario
-`multi-scenario/`). All were executed end to end on the target host
+`multi-scenario/`), plus `demo/` — the recording pipeline that produced the video at the top of
+[`README.md`](../README.md). All were executed end to end on the target host
 (Fedora 44 · rootless podman 5.8.7 · SELinux Enforcing · cgroup v2 · x86_64) against
 molecule 26.9.0 · molecule-plugins 26.9.28 · ansible-core 2.21.4. Every `molecule test`
 run exits **0** with the assertions genuinely executed (not a vacuous pass — see
@@ -10,6 +11,20 @@ run exits **0** with the assertions genuinely executed (not a vacuous pass — s
 > **The transcripts in this file and in `VERIFICATION.md` are real captured output from those
 > runs, trimmed. Nothing is reconstructed.** Read `VERIFICATION.md` before quoting any of the
 > documentation elsewhere: four of these canonical files do not work as written.
+
+## What is in here
+
+| Path | What it is | Start here |
+|---|---|---|
+| [`demo/`](./demo/) | The demo recording pipeline: `demo.gif` (866 × 534 px, 248 frames, ~1 min 54 s, 2.1 MB), `demo.cast` (asciicast v2), `demo.txt` (the exact 33 KB transcript), and the two scripts that produce them. | [`demo/README.md`](./demo/README.md), and the [annotated walkthrough](../docs/demo.md) |
+| [`systemd-unit/`](./systemd-unit/) | Proves `systemd` is PID 1 in a rootless container and a test-installed unit is active. | §2 below |
+| [`quickstart/`](./quickstart/) | The minimal copy / write / assert scenario. | §3 below |
+| [`multi-scenario/`](./multi-scenario/) | One project, two scenarios, and the `group_vars` trap it avoids. | §4 below, and [`multi-scenario/README.md`](./multi-scenario/README.md) |
+| [`VERIFICATION.md`](./VERIFICATION.md) | Every claim tested, every defect found in these docs, and the fix for each. | Read **DBG-1** first — it is the silent false pass. Then the [verdict table](./VERIFICATION.md#3-claim-by-claim-verdict-table). |
+
+The GIF plays inline on GitHub with plain Markdown — an ordinary Markdown image, nothing more — so
+there is no build step, no JavaScript and no external viewer. `demo.txt` is the evidence: any line
+quoted anywhere in this repository can be grepped out of it.
 
 ---
 
@@ -30,6 +45,13 @@ which is exactly the canonical path in `REFERENCE-CONFIG.md` §0.
 examples/
 ├── README.md
 ├── VERIFICATION.md          <- findings: every claim tested, every doc bug + fix
+├── demo/                    <- the demo recording pipeline
+│   ├── README.md            <- what the three artefacts are, how to re-record, limitations
+│   ├── demo.gif             <- 866x534, 248 frames, ~1 min 54 s, 2.1 MB
+│   ├── demo.cast            <- asciicast v2, 52 KB; asciinema play demo.cast
+│   ├── demo.txt             <- the exact terminal output, 33 KB; greppable, quotable
+│   ├── record.py            <- the recorder and renderer (Pillow only)
+│   └── steps.py             <- the demo script: what is said, what runs
 ├── systemd-unit/            <- proves systemd is PID 1 in a container
 │   └── molecule/default/
 │       ├── molecule.yml     <- REFERENCE-CONFIG §2b
@@ -259,7 +281,34 @@ is in [`multi-scenario/README.md`](multi-scenario/README.md).
 
 ---
 
-## 5. Cleanup
+## 5. `demo/` — the demo recording pipeline
+
+![Animated terminal recording of this project's demo on Fedora 44: a real `molecule test` run with rootless Podman 5.8.7 and Molecule 26.9.0. It shows the pre-flight check passing every check, `molecule --version` and the driver list including `podman`, the four keys in `molecule.yml` that make systemd PID 1, the verify recap reporting `ok=7` alongside `systemd is PID 1.` and `molecule-demo.service is active.`, a plain `podman run --systemd=always` container reporting `running`, the same container re-run with `--privileged` reporting `degraded`, and cleanup leaving no containers behind.](./demo/demo.gif)
+
+The video is not hand-animated. `demo/record.py` runs every command for real in a pseudo-terminal,
+and the callout cards pull their lines out of the captured output — so a claim that stops being
+true makes a card go empty rather than lie. It records from a `git clone` at a neutral path
+(`/tmp/molecule-demo-home/proj`) rather than from a checkout, and a leak check **refuses to write
+the GIF** if the recording machine's home directory or username reaches the frames; because it
+runs from a clone, the video always shows the committed state. The renderer is Pillow alone — no
+asciinema, no ffmpeg, no headless browser, no network.
+
+```bash
+asciinema play examples/demo/demo.cast     # the raw recording, re-playable
+grep -n "ok=" examples/demo/demo.txt       # grep the transcript; the docs were written this way
+python3 examples/demo/record.py --check    # record without rendering
+python3 examples/demo/record.py --reuse    # re-render from cached frames, without re-running
+```
+
+`demo/README.md` has the full pipeline, the per-platform install commands for Pillow and a
+box-drawing-capable monospace font, how to work with the leak check, and an honest
+known-limitations section — including the fact that **only the Fedora/x86_64 path has actually
+been recorded**. The beat-by-beat walkthrough, with the transcript quoted, is
+[`docs/demo.md`](../docs/demo.md).
+
+---
+
+## 6. Cleanup
 
 ```bash
 REPO="$(git rev-parse --show-toplevel)"
@@ -270,4 +319,5 @@ podman ps -a   # expect: header row only
 ```
 
 Verified after the final runs: `podman ps -a` lists **no containers**, and the scenario network
-is removed from `podman network ls`.
+is removed from `podman network ls`. The demo recording leaves nothing behind either — its last
+beat is the same `molecule destroy` followed by `podman ps -a`.

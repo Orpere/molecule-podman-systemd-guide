@@ -1,0 +1,470 @@
+$ bash docs/scripts/molecule-preflight.sh 2>&1 | sed "s/\b$USER\b/youruser/g"
+Molecule + Podman + systemd pre-flight check
+host: Linux x86_64
+
+== 1. Control groups (cgroups)
+  PASS  cgroup v2 is in use (cgroup2fs)
+
+== 2. Podman (the container engine)
+  PASS  podman found: podman version 5.8.7
+        major version 5 is supported
+  PASS  podman runs rootless (recommended)
+
+== 3. Rootless user-id mapping (newuidmap / subuid / subgid)
+  PASS  newuidmap found: /usr/bin/newuidmap
+  PASS  /etc/subuid has an entry for youruser
+  PASS  /etc/subgid has an entry for youruser
+
+== 4. SELinux (Linux only)
+  PASS  SELinux is Enforcing - this is the well-tested case
+        You do NOT need: setsebool container_manage_cgroup, /etc/containers/policy.json edits,
+        or --security-opt label=disable. Podman labels systemd containers container_init_t.
+
+== 5. Python (Molecule needs Python 3.10 or newer)
+  PASS  python3 found: 3.14
+  PASS  python3 is new enough (need >= 3.10)
+
+== 6. Molecule and the Podman driver
+  PASS  molecule [32m26.9.0[0m
+  PASS  the 'podman' driver is available (from molecule-plugins)
+
+== 7. The containers.podman Ansible collection
+  WARN  containers.podman is not installed yet
+        You do not need it installed up front. 'molecule test' installs it from
+        requirements.yml during the 'dependency' step. Run 'ansible-galaxy collection
+        install containers.podman' if you want it now.
+
+----------------------------------------
+RESULT: READY WITH WARNINGS - 1 warning(s), no hard failures
+You can continue. Read each WARN line before you start.
+
+[exit 0]
+
+$ molecule --version; echo; molecule drivers | grep -x podman
+molecule [32m26.9.0[0m using python [1;36m3.14[0m 
+    [33mansible[0m[2m:[0m[1;36m2.21.4[0m
+    [33mvagrant[0m[2m:[0m[1;36m26.9.28[0m[2m from molecule_plugins[0m
+    [33mpodman[0m[2m:[0m[1;36m26.9.28[0m[2m from molecule_plugins requiring collections: [0m[2;33mcontainers.podman[0m[2m>=[0m[1;2;36m1.8.1[0m
+    [33mec2[0m[2m:[0m[1;36m26.9.28[0m[2m from molecule_plugins[0m
+    [33mazure[0m[2m:[0m[1;36m26.9.28[0m[2m from molecule_plugins[0m
+    [33mcontainers[0m[2m:[0m[1;36m26.9.28[0m[2m from molecule_plugins requiring collections: [0m[2;33mansible.posix[0m[2m>=[0m[1;2;36m1.4.0[0m[2m [0m[2;33mcommunity.docker[0m[2m>=[0m[1;2;36m3.10.2[0m[2m [0m[2;33mcontainers.podman[0m[2m>=[0m[1;2;36m1.8.1[0m
+    [33mdocker[0m[2m:[0m[1;36m26.9.28[0m[2m from molecule_plugins requiring collections: [0m[2;33mcommunity.docker[0m[2m>=[0m[1;2;36m3.10.2[0m[2m [0m[2;33mansible.posix[0m[2m>=[0m[1;2;36m1.4.0[0m
+    [33mdefault[0m[2m:[0m[1;36m26.9.0[0m[2m from molecule[0m
+    [33mgce[0m[2m:[0m[1;36m26.9.28[0m[2m from molecule_plugins requiring collections: [0m[2;33mgoogle.cloud[0m[2m>=[0m[1;2;36m1.0.2[0m[2m [0m[2;33mcommunity.crypto[0m[2m>=[0m[1;2;36m1.8.0[0m
+    [33mopenstack[0m[2m:[0m[1;36m26.9.28[0m[2m from molecule_plugins requiring collections: [0m[2;33mopenstack.cloud[0m[2m>=[0m[1;2;36m2.1.0[0m
+
+podman
+
+[exit 0]
+
+$ cd examples/systemd-unit && molecule test
+[36mINFO    [0m [32mdefault[0m ➜ [33mdiscovery[0m: scenario test matrix: dependency, destroy, create, converge, idempotence, verify, cleanup, destroy
+[36mINFO    [0m [32mdefault[0m ➜ [33mprerun[0m: Performing prerun with role_name_check=0...
+[36mINFO    [0m [32mdefault[0m ➜ [33mdependency[0m: [36mExecuting[0m
+  [2m┌──────────────────────────────────────────────────────────────────────────────────[0m
+  [2m│ ansible-galaxy install[0m
+  [2m│   --role-file /tmp/molecule-demo-home/proj/examples/systemd-unit/molecule/default/requirements.yml[0m
+  [2m│[0m 
+  [2m│[0m Starting galaxy collection install process
+  [2m│[0m Nothing to do. All requested collections are already installed. If you want to reinstall them,
+  [2m│[0m   consider using `--force`.
+  [2m[32m└─ Return code: 0 ─────────────────────────────────────────────────────────────────[0m
+[36mINFO    [0m [32mdefault[0m ➜ [33mdependency[0m: Dependency completed successfully.
+  [2m┌──────────────────────────────────────────────────────────────────────────────────[0m
+  [2m│ ansible-galaxy collection[0m
+  [2m│   install[0m
+  [2m│ --requirements-file[0m
+  [2m│   /tmp/molecule-demo-home/proj/examples/systemd-unit/molecule/default/requirements.yml[0m
+  [2m│[0m 
+  [2m│[0m Starting galaxy collection install process
+  [2m│[0m Nothing to do. All requested collections are already installed. If you want to reinstall them,
+  [2m│[0m   consider using `--force`.
+  [2m[32m└─ Return code: 0 ─────────────────────────────────────────────────────────────────[0m
+[36mINFO    [0m [32mdefault[0m ➜ [33mdependency[0m: Dependency completed successfully.
+[36mINFO    [0m [32mdefault[0m ➜ [33mdependency[0m: [32mExecuted: Successful[0m
+[36mINFO    [0m [32mdefault[0m ➜ [33mdestroy[0m: [36mExecuting[0m
+[36mINFO    [0m Sanity checks: 'podman'
+  [2m┌──────────────────────────────────────────────────────────────────────────────────[0m
+  [2m│ ansible-playbook --inventory[0m
+  [2m│ /tmp/molecule-demo-home/.ansible/tmp/molecule.MEZH.default/inventory[0m
+  [2m│   --skip-tags molecule-notest,notest[0m
+  [2m│ /tmp/opencode/molvenv/lib64/python3.14/site-packages/molecule_plugins/podman/playbooks/destroy.y[0m
+  [2m│   ml[0m
+  [2m│[0m 
+  [2m│[0m 
+  [2m│[0m PLAY [Destroy] *****************************************************************
+  [2m│[0m 
+  [2m│[0m TASK [Set async_dir for HOME env] **********************************************
+  [2m[32m│[0m [0;32mok: [localhost][0m
+  [2m│[0m 
+  [2m│[0m TASK [Destroy molecule instance(s)] ********************************************
+  [2m[33m│[0m [33mchanged: [localhost] => (item={'command': '/sbin/init', 'groups': ['molecule'], 'image':[0m
+  [2m[33m│[0m [33m  'registry.access.redhat.com/ubi9/ubi-init:latest', 'name': 'instance', 'override_command':[0m
+  [2m[33m│[0m [33m  True, 'privileged': False, 'systemd': 'always'})[0m
+  [2m│[0m 
+  [2m│[0m TASK [Wait for instance(s) deletion to complete] *******************************
+  [2m[33m│[0m [33mchanged: [localhost] => (item={'changed': True, 'failed': False, 'finished': False,[0m
+  [2m[33m│[0m [33m  'ansible_job_id': 'j115338620739.396714', 'changed_when_result': True, 'ansible_loop_var':[0m
+  [2m[33m│[0m [33m  'item', 'item': {'command': '/sbin/init', 'groups': ['molecule'], 'image':[0m
+  [2m[33m│[0m [33m  'registry.access.redhat.com/ubi9/ubi-init:latest', 'name': 'instance', 'override_command':[0m
+  [2m[33m│[0m [33m  True, 'privileged': False, 'systemd': 'always'}, 'started': True, 'results_file':[0m
+  [2m[33m│[0m [33m  '/tmp/molecule-demo-home/.ansible_async/j115338620739.396714'})[0m
+  [2m│[0m 
+  [2m│[0m TASK [Delete podman network dedicated to this scenario] ************************
+  [2m[36m│[0m [0;36mskipping: [localhost] => (item=None) [0m
+  [2m[36m│[0m [0;36mskipping: [localhost][0m
+  [2m│[0m 
+  [2m│[0m PLAY RECAP *********************************************************************
+  [2m[33m│[0m [33mlocalhost                  : ok=3    changed=2    unreachable=0    failed=0    skipped=1   [0m
+  [2m[33m│[0m [33m  rescued=0    ignored=0[0m
+  [2m│[0m 
+  [2m[32m└─ Return code: 0 ─────────────────────────────────────────────────────────────────[0m
+[36mINFO    [0m [32mdefault[0m ➜ [33mdestroy[0m: [32mExecuted: Successful[0m
+[36mINFO    [0m [32mdefault[0m ➜ [33mcreate[0m: [36mExecuting[0m
+  [2m┌──────────────────────────────────────────────────────────────────────────────────[0m
+  [2m│ ansible-playbook --inventory[0m
+  [2m│ /tmp/molecule-demo-home/.ansible/tmp/molecule.MEZH.default/inventory[0m
+  [2m│   --skip-tags molecule-notest,notest[0m
+  [2m│ /tmp/opencode/molvenv/lib64/python3.14/site-packages/molecule_plugins/podman/playbooks/create.ym[0m
+  [2m│   l[0m
+  [2m│[0m 
+  [2m│[0m 
+  [2m│[0m PLAY [Create] ******************************************************************
+  [2m│[0m 
+  [2m│[0m TASK [Set async_dir for HOME env] **********************************************
+  [2m[32m│[0m [0;32mok: [localhost][0m
+  [2m│[0m 
+  [2m│[0m TASK [Log into a container registry] *******************************************
+  [2m[36m│[0m [0;36mskipping: [localhost] => (item=(censored due to no_log)) [0m
+  [2m[36m│[0m [0;36mskipping: [localhost][0m
+  [2m│[0m 
+  [2m│[0m TASK [Check presence of custom Dockerfiles] ************************************
+  [2m[32m│[0m [0;32mok: [localhost] => (item=Dockerfile: None specified)[0m
+  [2m│[0m 
+  [2m│[0m TASK [Create Dockerfiles from image names] *************************************
+  [2m[33m│[0m [33mchanged: [localhost] => (item="Dockerfile: None specified; Image:[0m
+  [2m[33m│[0m [33m  registry.access.redhat.com/ubi9/ubi-init:latest")[0m
+  [2m│[0m 
+  [2m│[0m TASK [Discover local Podman images] ********************************************
+  [2m[32m│[0m [0;32mok: [localhost] => (item=instance)[0m
+  [2m│[0m 
+  [2m│[0m TASK [Build an Ansible compatible image] ***************************************
+  [2m[32m│[0m [0;32mok: [localhost] => (item=registry.access.redhat.com/ubi9/ubi-init:latest)[0m
+  [2m│[0m 
+  [2m│[0m TASK [Determine the CMD directives] ********************************************
+  [2m[32m│[0m [0;32mok: [localhost] => (item="instance command: /sbin/init")[0m
+  [2m│[0m 
+  [2m│[0m TASK [Discover local podman networks] ******************************************
+  [2m[36m│[0m [0;36mskipping: [localhost] => (item=None) [0m
+  [2m[36m│[0m [0;36mskipping: [localhost][0m
+  [2m│[0m 
+  [2m│[0m TASK [Create podman network dedicated to this scenario] ************************
+  [2m[36m│[0m [0;36mskipping: [localhost][0m
+  [2m│[0m 
+  [2m│[0m TASK [Create molecule instance(s)] *********************************************
+  [2m[32m│[0m [0;32mok: [localhost] => (item=instance)[0m
+  [2m│[0m 
+  [2m│[0m TASK [Wait for instance(s) creation to complete] *******************************
+  [2m│[0m FAILED - RETRYING: [localhost]: Wait for instance(s) creation to complete (299 retries left).
+  [2m[33m│[0m [0;33mchanged: [localhost] => (item=instance)[0m
+  [2m│[0m 
+  [2m│[0m PLAY RECAP *********************************************************************
+  [2m[33m│[0m [33mlocalhost                  : ok=8    changed=2    unreachable=0    failed=0    skipped=3   [0m
+  [2m[33m│[0m [33m  rescued=0    ignored=0[0m
+  [2m│[0m 
+  [2m[32m└─ Return code: 0 ─────────────────────────────────────────────────────────────────[0m
+[36mINFO    [0m [32mdefault[0m ➜ [33mcreate[0m: [32mExecuted: Successful[0m
+[36mINFO    [0m [32mdefault[0m ➜ [33mconverge[0m: [36mExecuting[0m
+  [2m┌──────────────────────────────────────────────────────────────────────────────────[0m
+  [2m│ ansible-playbook --inventory[0m
+  [2m│ /tmp/molecule-demo-home/.ansible/tmp/molecule.MEZH.default/inventory[0m
+  [2m│   --skip-tags molecule-notest,notest[0m
+  [2m│   /tmp/molecule-demo-home/proj/examples/systemd-unit/molecule/default/converge.yml[0m
+  [2m│[0m 
+  [2m│[0m 
+  [2m│[0m PLAY [Converge] ****************************************************************
+  [2m│[0m 
+  [2m│[0m TASK [Wait for systemd to finish booting] **************************************
+  [2m[32m│[0m [0;32mok: [instance][0m
+  [2m│[0m 
+  [2m│[0m TASK [Wait for systemd to settle (running or degraded)] ************************
+  [2m[32m│[0m [0;32mok: [instance][0m
+  [2m│[0m 
+  [2m│[0m TASK [Install the test service under test] *************************************
+  [2m[33m│[0m [0;33mchanged: [instance][0m
+  [2m│[0m 
+  [2m│[0m TASK [Reload systemd so it sees the new unit] **********************************
+  [2m[32m│[0m [0;32mok: [instance][0m
+  [2m│[0m 
+  [2m│[0m TASK [Start and enable the test service] ***************************************
+  [2m[33m│[0m [0;33mchanged: [instance][0m
+  [2m│[0m 
+  [2m│[0m PLAY RECAP *********************************************************************
+  [2m[33m│[0m [33minstance                   : ok=5    changed=2    unreachable=0    failed=0    skipped=0   [0m
+  [2m[33m│[0m [33m  rescued=0    ignored=0[0m
+  [2m│[0m 
+  [2m[32m└─ Return code: 0 ─────────────────────────────────────────────────────────────────[0m
+[36mINFO    [0m [32mdefault[0m ➜ [33mconverge[0m: [32mExecuted: Successful[0m
+[36mINFO    [0m [32mdefault[0m ➜ [33midempotence[0m: [36mExecuting[0m
+  [2m┌──────────────────────────────────────────────────────────────────────────────────[0m
+  [2m│ ansible-playbook --inventory[0m
+  [2m│ /tmp/molecule-demo-home/.ansible/tmp/molecule.MEZH.default/inventory[0m
+  [2m│   --skip-tags molecule-notest,notest,molecule-idempotence-notest[0m
+  [2m│   /tmp/molecule-demo-home/proj/examples/systemd-unit/molecule/default/converge.yml[0m
+  [2m│[0m 
+  [2m│[0m 
+  [2m│[0m PLAY [Converge] ****************************************************************
+  [2m│[0m 
+  [2m│[0m TASK [Wait for systemd to finish booting] **************************************
+  [2m[32m│[0m [0;32mok: [instance][0m
+  [2m│[0m 
+  [2m│[0m TASK [Wait for systemd to settle (running or degraded)] ************************
+  [2m[32m│[0m [0;32mok: [instance][0m
+  [2m│[0m 
+  [2m│[0m TASK [Install the test service under test] *************************************
+  [2m[32m│[0m [0;32mok: [instance][0m
+  [2m│[0m 
+  [2m│[0m TASK [Reload systemd so it sees the new unit] **********************************
+  [2m[32m│[0m [0;32mok: [instance][0m
+  [2m│[0m 
+  [2m│[0m TASK [Start and enable the test service] ***************************************
+  [2m[32m│[0m [0;32mok: [instance][0m
+  [2m│[0m 
+  [2m│[0m PLAY RECAP *********************************************************************
+  [2m[32m│[0m [32minstance                   : ok=5    changed=0    unreachable=0    failed=0    skipped=0   [0m
+  [2m[32m│[0m [32m  rescued=0    ignored=0[0m
+  [2m│[0m 
+  [2m[32m└─ Return code: 0 ─────────────────────────────────────────────────────────────────[0m
+[36mINFO    [0m [32mdefault[0m ➜ [33midempotence[0m: [32mExecuted: Successful[0m
+[36mINFO    [0m [32mdefault[0m ➜ [33mverify[0m: [36mExecuting[0m
+  [2m┌──────────────────────────────────────────────────────────────────────────────────[0m
+  [2m│ ansible-playbook --inventory[0m
+  [2m│ /tmp/molecule-demo-home/.ansible/tmp/molecule.MEZH.default/inventory[0m
+  [2m│   --skip-tags molecule-notest,notest[0m
+  [2m│   /tmp/molecule-demo-home/proj/examples/systemd-unit/molecule/default/verify.yml[0m
+  [2m│[0m 
+  [2m│[0m 
+  [2m│[0m PLAY [Verify systemd and the test service] *************************************
+  [2m│[0m 
+  [2m│[0m TASK [Read what PID 1 is] ******************************************************
+  [2m[32m│[0m [0;32mok: [instance][0m
+  [2m│[0m 
+  [2m│[0m TASK [Confirm systemd is the top process] **************************************
+  [2m[32m│[0m [0;32mok: [instance] => {[0m
+  [2m[32m│[0m [0;32m    "changed": false,[0m
+  [2m[32m│[0m [0;32m    "msg": "systemd is PID 1."[0m
+  [2m[32m│[0m [0;32m}[0m
+  [2m│[0m 
+  [2m│[0m TASK [Read the container UUID that Podman sets in systemd mode] ****************
+  [2m[32m│[0m [0;32mok: [instance][0m
+  [2m│[0m 
+  [2m│[0m TASK [Collect the instance's service facts] ************************************
+  [2m[32m│[0m [0;32mok: [instance][0m
+  [2m│[0m 
+  [2m│[0m TASK [Confirm systemd is running the managed service] **************************
+  [2m[32m│[0m [0;32mok: [instance] => {[0m
+  [2m[32m│[0m [0;32m    "changed": false,[0m
+  [2m[32m│[0m [0;32m    "msg": "molecule-demo.service is active."[0m
+  [2m[32m│[0m [0;32m}[0m
+  [2m│[0m 
+  [2m│[0m TASK [Show the systemd state and any failed units (diagnostic, non-fatal)] *****
+  [2m[32m│[0m [0;32mok: [instance][0m
+  [2m│[0m 
+  [2m│[0m TASK [Print the diagnostics] ***************************************************
+  [2m[32m│[0m [0;32mok: [instance] => {[0m
+  [2m[32m│[0m [0;32m    "sd.stdout_lines": [[0m
+  [2m[32m│[0m [0;32m        "running",[0m
+  [2m[32m│[0m [0;32m        "  UNIT LOAD ACTIVE SUB DESCRIPTION",[0m
+  [2m[32m│[0m [0;32m        "0 loaded units listed."[0m
+  [2m[32m│[0m [0;32m    ][0m
+  [2m[32m│[0m [0;32m}[0m
+  [2m│[0m 
+  [2m│[0m PLAY RECAP *********************************************************************
+  [2m[32m│[0m [32minstance                   : ok=7    changed=0    unreachable=0    failed=0    skipped=0   [0m
+  [2m[32m│[0m [32m  rescued=0    ignored=0[0m
+  [2m│[0m 
+  [2m[32m└─ Return code: 0 ─────────────────────────────────────────────────────────────────[0m
+[36mINFO    [0m [32mdefault[0m ➜ [33mverify[0m: [32mExecuted: Successful[0m
+[36mINFO    [0m [32mdefault[0m ➜ [33mcleanup[0m: [36mExecuting[0m
+  [2m┌──────────────────────────────────────────────────────────────────────────────────[0m
+  [2m│ ansible-playbook --inventory[0m
+  [2m│ /tmp/molecule-demo-home/.ansible/tmp/molecule.MEZH.default/inventory[0m
+  [2m│   --skip-tags molecule-notest,notest[0m
+  [2m│   /tmp/molecule-demo-home/proj/examples/systemd-unit/molecule/default/cleanup.yml[0m
+  [2m│[0m 
+  [2m│[0m 
+  [2m│[0m PLAY [Cleanup] *****************************************************************
+  [2m│[0m 
+  [2m│[0m TASK [Remove the instance config file] *****************************************
+  [2m[32m│[0m [0;32mok: [localhost][0m
+  [2m│[0m 
+  [2m│[0m PLAY RECAP *********************************************************************
+  [2m[32m│[0m [32mlocalhost                  : ok=1    changed=0    unreachable=0    failed=0    skipped=0   [0m
+  [2m[32m│[0m [32m  rescued=0    ignored=0[0m
+  [2m│[0m 
+  [2m[32m└─ Return code: 0 ─────────────────────────────────────────────────────────────────[0m
+[36mINFO    [0m [32mdefault[0m ➜ [33mcleanup[0m: [32mExecuted: Successful[0m
+[36mINFO    [0m [32mdefault[0m ➜ [33mdestroy[0m: [36mExecuting[0m
+  [2m┌──────────────────────────────────────────────────────────────────────────────────[0m
+  [2m│ ansible-playbook --inventory[0m
+  [2m│ /tmp/molecule-demo-home/.ansible/tmp/molecule.MEZH.default/inventory[0m
+  [2m│   --skip-tags molecule-notest,notest[0m
+  [2m│ /tmp/opencode/molvenv/lib64/python3.14/site-packages/molecule_plugins/podman/playbooks/destroy.y[0m
+  [2m│   ml[0m
+  [2m│[0m 
+  [2m│[0m 
+  [2m│[0m PLAY [Destroy] *****************************************************************
+  [2m│[0m 
+  [2m│[0m TASK [Set async_dir for HOME env] **********************************************
+  [2m[32m│[0m [0;32mok: [localhost][0m
+  [2m│[0m 
+  [2m│[0m TASK [Destroy molecule instance(s)] ********************************************
+  [2m[33m│[0m [33mchanged: [localhost] => (item={'command': '/sbin/init', 'groups': ['molecule'], 'image':[0m
+  [2m[33m│[0m [33m  'registry.access.redhat.com/ubi9/ubi-init:latest', 'name': 'instance', 'override_command':[0m
+  [2m[33m│[0m [33m  True, 'privileged': False, 'systemd': 'always'})[0m
+  [2m│[0m 
+  [2m│[0m TASK [Wait for instance(s) deletion to complete] *******************************
+  [2m│[0m FAILED - RETRYING: [localhost]: Wait for instance(s) deletion to complete (299 retries left).
+  [2m[33m│[0m [33mchanged: [localhost] => (item={'changed': True, 'failed': False, 'finished': False,[0m
+  [2m[33m│[0m [33m  'ansible_job_id': 'j123774335777.401915', 'changed_when_result': True, 'ansible_loop_var':[0m
+  [2m[33m│[0m [33m  'item', 'item': {'command': '/sbin/init', 'groups': ['molecule'], 'image':[0m
+  [2m[33m│[0m [33m  'registry.access.redhat.com/ubi9/ubi-init:latest', 'name': 'instance', 'override_command':[0m
+  [2m[33m│[0m [33m  True, 'privileged': False, 'systemd': 'always'}, 'started': True, 'results_file':[0m
+  [2m[33m│[0m [33m  '/tmp/molecule-demo-home/.ansible_async/j123774335777.401915'})[0m
+  [2m│[0m 
+  [2m│[0m TASK [Delete podman network dedicated to this scenario] ************************
+  [2m[36m│[0m [0;36mskipping: [localhost] => (item=None) [0m
+  [2m[36m│[0m [0;36mskipping: [localhost][0m
+  [2m│[0m 
+  [2m│[0m PLAY RECAP *********************************************************************
+  [2m[33m│[0m [33mlocalhost                  : ok=3    changed=2    unreachable=0    failed=0    skipped=1   [0m
+  [2m[33m│[0m [33m  rescued=0    ignored=0[0m
+  [2m│[0m 
+  [2m[32m└─ Return code: 0 ─────────────────────────────────────────────────────────────────[0m
+[36mINFO    [0m [32mdefault[0m ➜ [33mdestroy[0m: [32mExecuted: Successful[0m
+[36mINFO    [0m [32mdefault[0m ➜ [33mscenario[0m: Pruning extra files from scenario ephemeral directory
+[36mINFO    [0m Molecule executed 1 scenario ([32m1 successful[0m)
+
+[1m[4mDETAILS                                                                        [0m
+[32mdefault[0m ➜ [33mdependency[0m: [32mExecuted: Successful[0m
+[32mdefault[0m ➜ [33mdestroy[0m: [32mExecuted: Successful[0m
+[32mdefault[0m ➜ [33mcreate[0m: [32mExecuted: Successful[0m
+[32mdefault[0m ➜ [33mconverge[0m: [32mExecuted: Successful[0m
+[32mdefault[0m ➜ [33midempotence[0m: [32mExecuted: Successful[0m
+[32mdefault[0m ➜ [33mverify[0m: [32mExecuted: Successful[0m
+[32mdefault[0m ➜ [33mcleanup[0m: [32mExecuted: Successful[0m
+[32mdefault[0m ➜ [33mdestroy[0m: [32mExecuted: Successful[0m
+
+[1m[4mSCENARIO RECAP                                                                 [0m
+[32mdefault                   [0m: [33mactions=8[0m  [32msuccessful=7[0m  disabled=0  skipped=0  missing=0  failed=0
+
+
+[exit 0]
+
+$ podman run -d --name demo --systemd=always registry.access.redhat.com/ubi9/ubi-init >/dev/null && sleep 4 && podman exec demo systemctl is-system-running; podman rm -f demo >/dev/null
+running
+
+[exit 0]
+
+$ podman run -d --name demo --privileged --systemd=always registry.access.redhat.com/ubi9/ubi-init >/dev/null && sleep 5 && podman exec demo systemctl is-system-running; podman rm -f demo >/dev/null
+degraded
+
+[exit 0]
+
+$ cd examples/systemd-unit && molecule destroy && podman ps -a
+[36mINFO    [0m [32mdefault[0m ➜ [33mdiscovery[0m: scenario test matrix: dependency, cleanup, destroy
+[36mINFO    [0m [32mdefault[0m ➜ [33mprerun[0m: Performing prerun with role_name_check=0...
+[36mINFO    [0m [32mdefault[0m ➜ [33mdependency[0m: [36mExecuting[0m
+  [2m┌──────────────────────────────────────────────────────────────────────────────────[0m
+  [2m│ ansible-galaxy install[0m
+  [2m│   --role-file /tmp/molecule-demo-home/proj/examples/systemd-unit/molecule/default/requirements.yml[0m
+  [2m│[0m 
+  [2m│[0m Starting galaxy collection install process
+  [2m│[0m Nothing to do. All requested collections are already installed. If you want to reinstall them,
+  [2m│[0m   consider using `--force`.
+  [2m[32m└─ Return code: 0 ─────────────────────────────────────────────────────────────────[0m
+[36mINFO    [0m [32mdefault[0m ➜ [33mdependency[0m: Dependency completed successfully.
+  [2m┌──────────────────────────────────────────────────────────────────────────────────[0m
+  [2m│ ansible-galaxy collection[0m
+  [2m│   install[0m
+  [2m│ --requirements-file[0m
+  [2m│   /tmp/molecule-demo-home/proj/examples/systemd-unit/molecule/default/requirements.yml[0m
+  [2m│[0m 
+  [2m│[0m Starting galaxy collection install process
+  [2m│[0m Nothing to do. All requested collections are already installed. If you want to reinstall them,
+  [2m│[0m   consider using `--force`.
+  [2m[32m└─ Return code: 0 ─────────────────────────────────────────────────────────────────[0m
+[36mINFO    [0m [32mdefault[0m ➜ [33mdependency[0m: Dependency completed successfully.
+[36mINFO    [0m [32mdefault[0m ➜ [33mdependency[0m: [32mExecuted: Successful[0m
+[36mINFO    [0m [32mdefault[0m ➜ [33mcleanup[0m: [36mExecuting[0m
+[36mINFO    [0m Sanity checks: 'podman'
+  [2m┌──────────────────────────────────────────────────────────────────────────────────[0m
+  [2m│ ansible-playbook --inventory[0m
+  [2m│ /tmp/molecule-demo-home/.ansible/tmp/molecule.MEZH.default/inventory[0m
+  [2m│   --skip-tags molecule-notest,notest[0m
+  [2m│   /tmp/molecule-demo-home/proj/examples/systemd-unit/molecule/default/cleanup.yml[0m
+  [2m│[0m 
+  [2m│[0m 
+  [2m│[0m PLAY [Cleanup] *****************************************************************
+  [2m│[0m 
+  [2m│[0m TASK [Remove the instance config file] *****************************************
+  [2m[32m│[0m [0;32mok: [localhost][0m
+  [2m│[0m 
+  [2m│[0m PLAY RECAP *********************************************************************
+  [2m[32m│[0m [32mlocalhost                  : ok=1    changed=0    unreachable=0    failed=0    skipped=0   [0m
+  [2m[32m│[0m [32m  rescued=0    ignored=0[0m
+  [2m│[0m 
+  [2m[32m└─ Return code: 0 ─────────────────────────────────────────────────────────────────[0m
+[36mINFO    [0m [32mdefault[0m ➜ [33mcleanup[0m: [32mExecuted: Successful[0m
+[36mINFO    [0m [32mdefault[0m ➜ [33mdestroy[0m: [36mExecuting[0m
+  [2m┌──────────────────────────────────────────────────────────────────────────────────[0m
+  [2m│ ansible-playbook --inventory[0m
+  [2m│ /tmp/molecule-demo-home/.ansible/tmp/molecule.MEZH.default/inventory[0m
+  [2m│   --skip-tags molecule-notest,notest[0m
+  [2m│ /tmp/opencode/molvenv/lib64/python3.14/site-packages/molecule_plugins/podman/playbooks/destroy.y[0m
+  [2m│   ml[0m
+  [2m│[0m 
+  [2m│[0m 
+  [2m│[0m PLAY [Destroy] *****************************************************************
+  [2m│[0m 
+  [2m│[0m TASK [Set async_dir for HOME env] **********************************************
+  [2m[32m│[0m [0;32mok: [localhost][0m
+  [2m│[0m 
+  [2m│[0m TASK [Destroy molecule instance(s)] ********************************************
+  [2m[33m│[0m [33mchanged: [localhost] => (item={'command': '/sbin/init', 'groups': ['molecule'], 'image':[0m
+  [2m[33m│[0m [33m  'registry.access.redhat.com/ubi9/ubi-init:latest', 'name': 'instance', 'override_command':[0m
+  [2m[33m│[0m [33m  True, 'privileged': False, 'systemd': 'always'})[0m
+  [2m│[0m 
+  [2m│[0m TASK [Wait for instance(s) deletion to complete] *******************************
+  [2m[33m│[0m [33mchanged: [localhost] => (item={'changed': True, 'failed': False, 'finished': False,[0m
+  [2m[33m│[0m [33m  'ansible_job_id': 'j318103514148.403169', 'changed_when_result': True, 'ansible_loop_var':[0m
+  [2m[33m│[0m [33m  'item', 'item': {'command': '/sbin/init', 'groups': ['molecule'], 'image':[0m
+  [2m[33m│[0m [33m  'registry.access.redhat.com/ubi9/ubi-init:latest', 'name': 'instance', 'override_command':[0m
+  [2m[33m│[0m [33m  True, 'privileged': False, 'systemd': 'always'}, 'started': True, 'results_file':[0m
+  [2m[33m│[0m [33m  '/tmp/molecule-demo-home/.ansible_async/j318103514148.403169'})[0m
+  [2m│[0m 
+  [2m│[0m TASK [Delete podman network dedicated to this scenario] ************************
+  [2m[36m│[0m [0;36mskipping: [localhost] => (item=None) [0m
+  [2m[36m│[0m [0;36mskipping: [localhost][0m
+  [2m│[0m 
+  [2m│[0m PLAY RECAP *********************************************************************
+  [2m[33m│[0m [33mlocalhost                  : ok=3    changed=2    unreachable=0    failed=0    skipped=1   [0m
+  [2m[33m│[0m [33m  rescued=0    ignored=0[0m
+  [2m│[0m 
+  [2m[32m└─ Return code: 0 ─────────────────────────────────────────────────────────────────[0m
+[36mINFO    [0m [32mdefault[0m ➜ [33mdestroy[0m: [32mExecuted: Successful[0m
+[36mINFO    [0m [32mdefault[0m ➜ [33mscenario[0m: Pruning extra files from scenario ephemeral directory
+[36mINFO    [0m Molecule executed 1 scenario ([32m1 successful[0m)
+
+[1m[4mDETAILS                                                                        [0m
+[32mdefault[0m ➜ [33mdependency[0m: [32mExecuted: Successful[0m
+[32mdefault[0m ➜ [33mcleanup[0m: [32mExecuted: Successful[0m
+[32mdefault[0m ➜ [33mdestroy[0m: [32mExecuted: Successful[0m
+
+[1m[4mSCENARIO RECAP                                                                 [0m
+[32mdefault                   [0m: [33mactions=3[0m  [32msuccessful=2[0m  disabled=0  skipped=0  missing=0  failed=0
+
+CONTAINER ID  IMAGE       COMMAND     CREATED     STATUS      PORTS       NAMES
+
+[exit 0]
+
