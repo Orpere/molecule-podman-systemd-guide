@@ -1074,7 +1074,7 @@ Legend for target reader: **B** = beginner (never used Ansible) · **I** = inter
 | `examples/quickstart/` | E1 | The toolchain works; `molecule test` exits 0. No systemd. | `README.md`, `docs/quickstart.md`, `docs/authoring/your-first-scenario.md` | `docs/quickstart.md` |
 | `examples/systemd-unit/` | E1 | systemd is PID 1, a test unit is active, `verify-systemd` passes. | `docs/systemd-in-containers.md`, `docs/authoring/writing-tests.md` | `docs/systemd-in-containers.md` |
 | `examples/multi-scenario/` | E1 | Two scenarios, `--scenario-name`, the `group_vars` trap avoided. | `docs/authoring/multi-scenario.md` | `docs/authoring/multi-scenario.md` |
-| `examples/demo/` | E1 | That the six claims in `docs/demo.md` are backed by a real session. Ships `demo.gif` (866×534, 248 frames, ~1 min 54 s, 2.1 MB), `demo.cast` (asciicast v2, 52 KB), `demo.txt` (the exact 33 KB transcript), plus `record.py` and `steps.py`. | `README.md`, `docs/demo.md`, `docs/index.md` | `docs/demo.md` |
+| `examples/demo/` | E1 | That the six claims in `docs/demo.md` are backed by a real session. Ships `demo.gif` (866×534, 248 frames, ~1 min 54 s, 2.1 MB), `demo.cast` (asciicast v2, 51 KB), `demo.txt` (the exact 26 KB transcript), plus `record.py` and `steps.py`. | `README.md`, `docs/demo.md`, `docs/index.md` | `docs/demo.md` |
 
 Each example tree contains a `README.md` with: what it proves, the exact command, the expected
 final line, the expected exit code, and a `## Troubleshooting` line pointing at

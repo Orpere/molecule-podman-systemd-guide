@@ -12,7 +12,7 @@ no JavaScript and no external viewer.*
 
 This page is the long version of the GIF. Every line quoted below is copied from
 [`examples/demo/demo.txt`](../examples/demo/demo.txt), which is the exact terminal output of the
-recording — 33 KB, greppable, and the source of every quoted command on this site. Nothing here
+recording — 26 KB, greppable, and the source of every quoted command on this site. Nothing here
 is re-typeset from memory.
 
 > **How the recording works, in one paragraph.** The demo is not hand-animated.

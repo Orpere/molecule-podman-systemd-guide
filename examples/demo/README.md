@@ -15,8 +15,8 @@ command by command, rendered to an animated GIF by a script that lives here.
 | File | What it is | What it is for |
 |---|---|---|
 | **`demo.gif`** | The animated GIF: **866 × 534 px, 248 frames, ~1 min 54 s, 2.1 MB.** | What readers see. It plays inline on GitHub as an ordinary Markdown image, so there is no build step, no JavaScript, and no external player. [`README.md`](../../README.md) embeds it with a full `alt`. |
-| **`demo.cast`** | An [asciicast](https://asciinema.org/) v2 recording, **52 KB**, at 100 × 30 characters. | The portable, text-accurate original. Play it with `asciinema play examples/demo/demo.cast`. It carries every keystroke and every colour as data, so it is the artefact to trust if the GIF's pixels ever look wrong. |
-| **`demo.txt`** | The terminal output of the whole session with colour escapes removed, **33 KB**. | The evidence. Grep it, quote it, link to it. Every quoted command and every quoted line in this repository's documentation comes from this file. Escapes are stripped so a `grep -n` for a line you can see on screen actually finds it. |
+| **`demo.cast`** | An [asciicast](https://asciinema.org/) v2 recording, **51 KB**, at 100 × 30 characters. | The portable, text-accurate original. Play it with `asciinema play examples/demo/demo.cast`. It carries every keystroke and every colour as data, so it is the artefact to trust if the GIF's pixels ever look wrong. |
+| **`demo.txt`** | The terminal output of the whole session with colour escapes removed, **26 KB**. | The evidence. Grep it, quote it, link to it. Every quoted command and every quoted line in this repository's documentation comes from this file. Escapes are stripped so a `grep -n` for a line you can see on screen actually finds it. |
 | **`demo-raw.txt`** | The same session with the colour bytes left exactly as the tools emitted them, **33 KB**. | The unedited truth. Use it when you need to prove what a tool really wrote rather than what it looked like. |
 
 Plus the two files that produce them:
@@ -178,6 +178,16 @@ made on Fedora 44, x86-64, with rootless Podman 5.8.7, cgroup v2, Molecule 26.9.
 package metadata and upstream sources and **have not been filmed**. The other four platforms'
 instructions in the table above are from the same research; they are plausible and they are what
 the install pages say, but nobody has watched the demo render on them.
+
+**The GIF is the last version that verifies, not the newest one that was recorded.** `steps.py`
+is more explanatory than the GIF: it now opens with a title card, lists the seven sections, and
+explains what each one is for. `demo.cast` and `demo.txt` are from that newer script, but
+`demo.gif` is not. Re-recording it currently fails: Pillow's GIF writer intermittently encodes
+the title, contents and closing cards as blank frames, and drops the closing card at the end.
+The captured frames themselves are correct — the defect is in the encode, not the capture — so
+the fix is to change how the frames are written, not to change the demo. Until that is done, the
+GIF is left at the previous, verified render rather than shipping one with missing text. See
+[Known limitations](#known-limitations).
 
 **The video is 100 × 30 characters, so very long lines wrap.** The recorder asks the command for
 a 100-column, 30-row terminal, and lines longer than that wrap onto the next row exactly as they

@@ -333,7 +333,7 @@ Three properties make the recording trustworthy rather than decorative:
   Pillow is free and open source.
 
 The full transcript of the recording in this repository is
-[`examples/demo/demo.txt`](examples/demo/demo.txt) — 33 KB of exact terminal output, greppable
+[`examples/demo/demo.txt`](examples/demo/demo.txt) — 26 KB of exact terminal output, greppable
 and quotable. That is where every quoted line in this repository's documentation comes from.
 
 ---

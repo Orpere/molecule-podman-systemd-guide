@@ -16,7 +16,7 @@ run exits **0** with the assertions genuinely executed (not a vacuous pass — s
 
 | Path | What it is | Start here |
 |---|---|---|
-| [`demo/`](./demo/) | The demo recording pipeline: `demo.gif` (866 × 534 px, 248 frames, ~1 min 54 s, 2.1 MB), `demo.cast` (asciicast v2), `demo.txt` (the exact 33 KB transcript), and the two scripts that produce them. | [`demo/README.md`](./demo/README.md), and the [annotated walkthrough](../docs/demo.md) |
+| [`demo/`](./demo/) | The demo recording pipeline: `demo.gif` (866 × 534 px, 248 frames, ~1 min 54 s, 2.1 MB), `demo.cast` (asciicast v2), `demo.txt` (the exact 26 KB transcript), and the two scripts that produce them. | [`demo/README.md`](./demo/README.md), and the [annotated walkthrough](../docs/demo.md) |
 | [`systemd-unit/`](./systemd-unit/) | Proves `systemd` is PID 1 in a rootless container and a test-installed unit is active. | §2 below |
 | [`quickstart/`](./quickstart/) | The minimal copy / write / assert scenario. | §3 below |
 | [`multi-scenario/`](./multi-scenario/) | One project, two scenarios, and the `group_vars` trap it avoids. | §4 below, and [`multi-scenario/README.md`](./multi-scenario/README.md) |
@@ -49,7 +49,7 @@ examples/
 │   ├── README.md            <- what the three artefacts are, how to re-record, limitations
 │   ├── demo.gif             <- 866x534, 248 frames, ~1 min 54 s, 2.1 MB
 │   ├── demo.cast            <- asciicast v2, 52 KB; asciinema play demo.cast
-│   ├── demo.txt             <- the exact terminal output, 33 KB; greppable, quotable
+│   ├── demo.txt             <- the exact terminal output, 26 KB; greppable, quotable
 │   ├── record.py            <- the recorder and renderer (Pillow only)
 │   └── steps.py             <- the demo script: what is said, what runs
 ├── systemd-unit/            <- proves systemd is PID 1 in a container
