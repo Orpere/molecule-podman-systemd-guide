@@ -29,14 +29,10 @@ host: Linux x86_64
   PASS  the 'podman' driver is available (from molecule-plugins)
 
 == 7. The containers.podman Ansible collection
-  WARN  containers.podman is not installed yet
-        You do not need it installed up front. 'molecule test' installs it from
-        requirements.yml during the 'dependency' step. Run 'ansible-galaxy collection
-        install containers.podman' if you want it now.
+  PASS  containers.podman collection is installed (version 1.20.2)
 
 ----------------------------------------
-RESULT: READY WITH WARNINGS - 1 warning(s), no hard failures
-You can continue. Read each WARN line before you start.
+RESULT: READY - every check passed
 
 [exit 0]
 
@@ -44,14 +40,14 @@ $ molecule --version; echo; molecule drivers | grep -x podman
 molecule 26.9.0 using python 3.14 
     ansible:2.21.4
     vagrant:26.9.28 from molecule_plugins
+    default:26.9.0 from molecule
     podman:26.9.28 from molecule_plugins requiring collections: containers.podman>=1.8.1
+    gce:26.9.28 from molecule_plugins requiring collections: google.cloud>=1.0.2 community.crypto>=1.8.0
+    docker:26.9.28 from molecule_plugins requiring collections: community.docker>=3.10.2 ansible.posix>=1.4.0
+    containers:26.9.28 from molecule_plugins requiring collections: ansible.posix>=1.4.0 community.docker>=3.10.2 containers.podman>=1.8.1
+    openstack:26.9.28 from molecule_plugins requiring collections: openstack.cloud>=2.1.0
     ec2:26.9.28 from molecule_plugins
     azure:26.9.28 from molecule_plugins
-    containers:26.9.28 from molecule_plugins requiring collections: ansible.posix>=1.4.0 community.docker>=3.10.2 containers.podman>=1.8.1
-    docker:26.9.28 from molecule_plugins requiring collections: community.docker>=3.10.2 ansible.posix>=1.4.0
-    default:26.9.0 from molecule
-    gce:26.9.28 from molecule_plugins requiring collections: google.cloud>=1.0.2 community.crypto>=1.8.0
-    openstack:26.9.28 from molecule_plugins requiring collections: openstack.cloud>=2.1.0
 
 podman
 
@@ -104,11 +100,11 @@ INFO     Sanity checks: 'podman'
   │ 
   │ TASK [Wait for instance(s) deletion to complete] *******************************
   │ changed: [localhost] => (item={'changed': True, 'failed': False, 'finished': False,
-  │   'ansible_job_id': 'j115338620739.396714', 'changed_when_result': True, 'ansible_loop_var':
+  │   'ansible_job_id': 'j378455722525.470231', 'changed_when_result': True, 'ansible_loop_var':
   │   'item', 'item': {'command': '/sbin/init', 'groups': ['molecule'], 'image':
   │   'registry.access.redhat.com/ubi9/ubi-init:latest', 'name': 'instance', 'override_command':
   │   True, 'privileged': False, 'systemd': 'always'}, 'started': True, 'results_file':
-  │   '/tmp/molecule-demo-home/.ansible_async/j115338620739.396714'})
+  │   '/tmp/molecule-demo-home/.ansible_async/j378455722525.470231'})
   │ 
   │ TASK [Delete podman network dedicated to this scenario] ************************
   │ skipping: [localhost] => (item=None) 
@@ -326,11 +322,11 @@ INFO     default ➜ destroy: Executing
   │ TASK [Wait for instance(s) deletion to complete] *******************************
   │ FAILED - RETRYING: [localhost]: Wait for instance(s) deletion to complete (299 retries left).
   │ changed: [localhost] => (item={'changed': True, 'failed': False, 'finished': False,
-  │   'ansible_job_id': 'j123774335777.401915', 'changed_when_result': True, 'ansible_loop_var':
+  │   'ansible_job_id': 'j704878657489.475404', 'changed_when_result': True, 'ansible_loop_var':
   │   'item', 'item': {'command': '/sbin/init', 'groups': ['molecule'], 'image':
   │   'registry.access.redhat.com/ubi9/ubi-init:latest', 'name': 'instance', 'override_command':
   │   True, 'privileged': False, 'systemd': 'always'}, 'started': True, 'results_file':
-  │   '/tmp/molecule-demo-home/.ansible_async/j123774335777.401915'})
+  │   '/tmp/molecule-demo-home/.ansible_async/j704878657489.475404'})
   │ 
   │ TASK [Delete podman network dedicated to this scenario] ************************
   │ skipping: [localhost] => (item=None) 
@@ -437,11 +433,11 @@ INFO     default ➜ destroy: Executing
   │ 
   │ TASK [Wait for instance(s) deletion to complete] *******************************
   │ changed: [localhost] => (item={'changed': True, 'failed': False, 'finished': False,
-  │   'ansible_job_id': 'j318103514148.403169', 'changed_when_result': True, 'ansible_loop_var':
+  │   'ansible_job_id': 'j827706692194.476725', 'changed_when_result': True, 'ansible_loop_var':
   │   'item', 'item': {'command': '/sbin/init', 'groups': ['molecule'], 'image':
   │   'registry.access.redhat.com/ubi9/ubi-init:latest', 'name': 'instance', 'override_command':
   │   True, 'privileged': False, 'systemd': 'always'}, 'started': True, 'results_file':
-  │   '/tmp/molecule-demo-home/.ansible_async/j318103514148.403169'})
+  │   '/tmp/molecule-demo-home/.ansible_async/j827706692194.476725'})
   │ 
   │ TASK [Delete podman network dedicated to this scenario] ************************
   │ skipping: [localhost] => (item=None) 

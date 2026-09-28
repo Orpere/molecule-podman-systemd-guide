@@ -10,6 +10,11 @@ no expected outputs written by hand: the callouts pull matching lines out of
 whatever the tool actually printed, so if a claim in this file stops being true
 the callout goes empty rather than lying.
 
+The writing aims at someone who has never used Molecule, Podman or Ansible, so
+each section says what is happening and why it matters, not just which key to
+press. Section names must match CHAPTERS in record.py, which drives the header
+bar.
+
 A note on the environment below
 -------------------------------
 The recording deliberately runs the commands with a neutral ``HOME`` and a
@@ -112,24 +117,70 @@ def build_steps():
         ),
         "moneyline": "Every tool here is free. Nothing in this demo costs money.",
         "steps": [
-            # ---------------------------------------------------------- pitch
+            # ================================================== title
             {
-                "t": "note",
-                "text": (
+                "t": "card",
+                "chapter": "Overview",
+                "kicker": "A two-minute tour",
+                "title": "Test your Ansible for real",
+                "sub": (
                     "Molecule builds a throwaway container, runs your Ansible "
-                    "content inside it, and throws it away. The part that makes "
-                    "it useful is that the container runs a real init system, so "
-                    "you can test that your role actually starts a service."
+                    "inside it, checks the result, and deletes it. Nothing here "
+                    "is simulated - every command you are about to see was run "
+                    "on a real machine, and the callouts are lifted from what "
+                    "the tools actually printed."
                 ),
-                "rule": True,
-                "wait": 2.2,
+                "foot": (
+                    "New to Molecule, Podman or Ansible? That is the right "
+                    "starting point. Each section explains what it is doing."
+                ),
+                "wait": 5.0,
             },
-            # ------------------------------------------------------ pre-flight
+            # ================================================== contents
+            {
+                "t": "card",
+                "chapter": "Overview",
+                "kicker": "What this covers",
+                "title": "Seven short sections",
+                "items": [
+                    "Check the host is ready before installing anything",
+                    "Confirm the toolchain, and the one install mistake that breaks it",
+                    "The four keys that make systemd PID 1 in a container",
+                    "Run the test, and prove the assertions really ran",
+                    "The same thing in plain Podman, with no Molecule at all",
+                    "Why the most-copied advice on the internet makes it worse",
+                ],
+                "foot": "The last two sections are the ones worth remembering.",
+                "wait": 5.0,
+            },
+            # ================================================== 1. pitch
             {
                 "t": "note",
-                "text": "Step 0 - is this machine ready? There is a script, and it only reads.",
-                "arrow": True,
-                "wait": 1.4,
+                "chapter": "Overview",
+                "text": (
+                    "Why bother with a container at all? Because the part of "
+                    "your role most likely to be broken is the part that talks to "
+                    "the init system. Molecule gives you a real one - a real "
+                    "systemd, real unit files, real service lifecycle - for the "
+                    "price of a container that throws itself away afterwards. So "
+                    "you can test that starting a service actually works, not just "
+                    "that a task reported changed."
+                ),
+                "wait": 4.0,
+            },
+            # ================================================== 2. pre-flight
+            {
+                "t": "note",
+                "chapter": "Is this host ready?",
+                "text": (
+                    "Start by finding out whether this machine can do it at all. "
+                    "The script only reads: it installs nothing, elevates nothing, "
+                    "and touches nothing outside Podman's own storage. It is "
+                    "worth running before you install anything, because two of "
+                    "its checks catch problems that are very hard to diagnose "
+                    "later."
+                ),
+                "wait": 3.6,
             },
             {
                 "t": "cmd",
@@ -141,22 +192,28 @@ def build_steps():
             },
             {
                 "t": "focus",
-                "label": "Everything the host must already be doing right",
+                "label": "The two checks that cause real trouble",
                 "patterns": [r"PASS\s+cgroup v2", r"PASS\s+podman runs rootless", r"RESULT: READY"],
                 "max": 3,
                 "colour": OKC,
                 "tail": (
-                    "cgroup v2 is the one that bites people. Podman 6 cannot run "
-                    "systemd in a container on a cgroup v1 host at all."
+                    "Cgroup v2 is the one to internalise. Podman 6 cannot run "
+                    "systemd inside a container on a cgroup v1 host at all, and "
+                    "the failure looks like systemd simply hanging. Rootless is "
+                    "the right default: no root daemon, no shared socket, nothing "
+                    "listening for other users."
                 ),
-                "wait": 3.0,
+                "wait": 4.4,
             },
-            # ------------------------------------------------------- toolchain
+            # ================================================== 3. toolchain
             {
                 "t": "note",
-                "text": "Step 1 - the toolchain.",
-                "arrow": True,
-                "wait": 1.2,
+                "chapter": "The toolchain",
+                "text": (
+                    "Two commands, and the first one teaches the most common "
+                    "installation mistake there is."
+                ),
+                "wait": 2.6,
             },
             {
                 "t": "cmd",
@@ -171,21 +228,26 @@ def build_steps():
                 "max": 2,
                 "colour": OKC,
                 "tail": (
-                    "The Podman driver is not in Molecule itself. It comes from the "
-                    "separate molecule-plugins package, so 'podman' has to appear in "
-                    "that second list or nothing will work."
+                    "Notice ansible-core in that first line. Molecule shells out "
+                    "to ansible-config the moment it starts, and it does not "
+                    "declare ansible-core as a dependency - so installing "
+                    "Molecule on its own gives you a binary that crashes with "
+                    "'ansible-config not found'. Install them together. And "
+                    "'podman' in that second list is not in Molecule: it comes "
+                    "from the separate molecule-plugins package."
                 ),
-                "wait": 3.0,
+                "wait": 4.8,
             },
-            # ------------------------------------------------------------ crux
+            # ================================================== 4. the crux
             {
                 "t": "note",
+                "chapter": "The four keys",
                 "text": (
-                    "Step 2 - the crux. Four keys in molecule.yml turn an ordinary "
-                    "container into one that runs systemd as PID 1."
+                    "This is the whole configuration, and it is short on purpose. "
+                    "Four keys do all the work. The three in amber are what make "
+                    "systemd run as PID 1 instead of a shell."
                 ),
-                "arrow": True,
-                "wait": 1.6,
+                "wait": 3.2,
             },
             {
                 "t": "file",
@@ -198,7 +260,6 @@ def build_steps():
                     "driver:", "name: podman", "platforms:", "- name: instance",
                     "image:", "command:", "override_command:", "systemd:",
                     "privileged:", "groups:", "- molecule",
-                    "ansible_connection:",
                 ],
                 "highlight": [
                     ("command: /sbin/init", KEY, True),
@@ -207,22 +268,44 @@ def build_steps():
                     ("groups:", OKC, True),
                     ("- molecule", OKC, True),
                 ],
-                "wait": 3.4,
+                "wait": 4.2,
             },
             {
                 "t": "note",
+                "chapter": "The four keys",
                 "text": (
-                    "The three amber lines make systemd run. The green one is the "
-                    "line almost every tutorial forgets."
+                    "The amber three: point the container at systemd as its entry "
+                    "point, tell Molecule not to override that with its own sleep "
+                    "loop, and force systemd mode on. That is all it takes - no "
+                    "--privileged, no policy file edits."
                 ),
-                "wait": 2.0,
+                "wait": 4.0,
             },
-            # ------------------------------------------------------------- run
             {
                 "t": "note",
-                "text": "Step 3 - run the whole scenario. Create, converge, verify, destroy.",
-                "arrow": True,
-                "wait": 1.4,
+                "chapter": "The four keys",
+                "text": (
+                    "The green one is the line most tutorials forget, and it is "
+                    "the single most useful thing in this video. Molecule builds "
+                    "its Ansible groups from this 'groups' key, and the default is "
+                    "'ungrouped' - there is no built-in 'molecule' group. Leave it "
+                    "out and every play in your project silently skips, because "
+                    "'hosts: molecule' now matches nothing, and molecule test "
+                    "still exits 0. You get a green run that tested nothing at all."
+                ),
+                "wait": 5.2,
+            },
+            # ================================================== 5. run it
+            {
+                "t": "note",
+                "chapter": "Run the test",
+                "text": (
+                    "Now run it. Molecule creates a container, applies the "
+                    "configuration, checks the result, and destroys the container "
+                    "again. It takes about half a minute, almost all of it "
+                    "container start-up."
+                ),
+                "wait": 3.2,
             },
             {
                 "t": "cmd",
@@ -230,42 +313,46 @@ def build_steps():
                 "cwd": str(WORKTREE),
                 "env": safe_env(),
             },
-            # ---------------------------------------------------------- payoff
             {
                 "t": "focus",
-                "label": "This is the whole point of the exercise",
+                "label": "This is the point of the whole exercise",
                 "patterns": [r"systemd is PID 1", r"molecule-demo\.service is active"],
                 "max": 2,
                 "colour": OKC,
                 "tail": (
-                    "Not 'the playbook ran'. Not 'changed=0'. The init system is "
-                    "PID 1, and the service your role installed is active."
+                    "Read those two lines carefully. Not 'the playbook ran'. Not "
+                    "'changed=0'. The init system in that container really is PID "
+                    "1, and the service your role installed is genuinely active. "
+                    "That is the thing that is hard to be confident about without "
+                    "this."
                 ),
-                "wait": 3.4,
+                "wait": 5.0,
             },
             {
                 "t": "focus",
-                "label": "But did the test really run?",
+                "label": "And did the test really run?",
                 "patterns": [r"instance\s+: ok="],
                 "max": 1,
                 "colour": OKC,
                 "tail": (
-                    "Check this before you trust any green Molecule run. If the "
-                    "playbook skipped every host, molecule test still exits 0 and "
-                    "the recap shows failed=0 - while your assertions never ran at "
-                    "all. ok=7 with no 'no hosts matched' is the real signal."
+                    "Check this before you trust any green Molecule run. If your "
+                    "plays skip every host, molecule test still exits 0 and the "
+                    "recap still says failed=0 - while your assertions never ran. "
+                    "ok=7 with no 'no hosts matched' is the real signal, and it is "
+                    "the reason the 'groups' key exists."
                 ),
-                "wait": 3.6,
+                "wait": 5.4,
             },
-            # ------------------------------------------------------ by hand
+            # ================================================== 6. plain podman
             {
                 "t": "note",
+                "chapter": "Same thing in plain Podman",
                 "text": (
-                    "Step 4 - here is the same thing in plain Podman. This is what "
-                    "Molecule is automating for you."
+                    "Everything so far has been Molecule. Here is the identical "
+                    "result in three plain Podman commands, so you can see what "
+                    "the automation is actually doing underneath."
                 ),
-                "arrow": True,
-                "wait": 1.6,
+                "wait": 3.2,
             },
             {
                 "t": "cmd",
@@ -286,20 +373,23 @@ def build_steps():
                 "max": 1,
                 "colour": OKC,
                 "tail": (
-                    "--systemd=always. No --privileged, no policy.json edits, no "
-                    "setsebool. That advice is everywhere on the internet and most "
-                    "of it is folklore."
+                    "--systemd=always. That is the whole trick. No --privileged, "
+                    "no /etc/containers/policy.json edits, no setsebool. You will "
+                    "see all three of those recommended online; hold that thought "
+                    "for the next section."
                 ),
-                "wait": 3.0,
+                "wait": 4.6,
             },
-            # --------------------------------------------------------- the myth
+            # ================================================== 7. the myth
             {
                 "t": "note",
+                "chapter": "The --privileged myth",
                 "text": (
-                    "And the folklore is actively harmful. The most-copied advice is "
-                    "to add --privileged. Watch what it does:"
+                    "Here is the folklore, tested. The single most-copied piece of "
+                    "advice about systemd in containers is 'just add "
+                    "--privileged'. Watch what it does."
                 ),
-                "wait": 1.8,
+                "wait": 3.2,
             },
             {
                 "t": "cmd",
@@ -320,18 +410,24 @@ def build_steps():
                 "max": 1,
                 "colour": BADC,
                 "tail": (
-                    "--privileged unmounts /sys, so three of systemd's own units can "
-                    "no longer mount. You weakened the sandbox and broke the init "
-                    "system. The real fix was the narrower --systemd=always."
+                    "Same image, same flag, plus --privileged - and systemd went "
+                    "from running to degraded. --privileged unmounts /sys, so three "
+                    "of systemd's own units can no longer mount. You weakened the "
+                    "sandbox and broke the init system. The narrow flag from the "
+                    "previous section was the whole fix."
                 ),
-                "wait": 3.4,
+                "wait": 5.2,
             },
-            # --------------------------------------------------------- cleanup
+            # ================================================== 8. cleanup
             {
                 "t": "note",
-                "text": "Step 5 - clean up. Molecule destroys the scenario; nothing is left behind.",
-                "arrow": True,
-                "wait": 1.4,
+                "chapter": "The --privileged myth",
+                "text": (
+                    "Finally, clean up. Molecule destroys the scenario itself, so "
+                    "the point of all this is that you are left with no "
+                    "containers and no state."
+                ),
+                "wait": 2.8,
             },
             {
                 "t": "cmd",
@@ -339,13 +435,28 @@ def build_steps():
                 "cwd": str(WORKTREE),
                 "env": safe_env(),
             },
+            # ================================================== closing
             {
-                "t": "end",
-                "text": "That is the whole loop: make a container, prove your role works, throw it away.",
+                "t": "card",
+                "kicker": "That is the whole loop",
+                "title": "Make a container, prove your role, throw it away",
                 "sub": (
-                    "Full install guides for Fedora, Ubuntu, Arch, macOS and Mageia, "
-                    "plus how to write your own scenarios, are in the repository."
+                    "You have just seen a role that installs a systemd service "
+                    "and get told, by the init system itself, that the service is "
+                    "active. That is a much stronger claim than a task reporting "
+                    "'changed'."
                 ),
+                "items": [
+                    "docs/install/ - pick your platform, every step copy-pasteable",
+                    "docs/systemd-in-containers.md - why those four keys, in detail",
+                    "docs/authoring/ - write your own scenarios, including a CI workflow",
+                    "docs/troubleshooting.md - 21 symptoms, with the real error text",
+                ],
+                "foot": (
+                    "All of it free and open source. Nothing in this demo or in "
+                    "the guide costs money."
+                ),
+                "wait": 6.0,
             },
         ],
     }

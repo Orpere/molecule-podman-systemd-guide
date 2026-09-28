@@ -94,6 +94,7 @@ OK_FG = (126, 214, 160)
 BAD_FG = (255, 123, 114)
 NOTE_FG = (140, 152, 170)
 RULE = (44, 50, 62)
+HEAD_BG = (31, 36, 48)
 
 ANSI = {
     30: (70, 78, 92), 31: (255, 123, 114), 32: (126, 214, 160), 33: (255, 209, 102),
@@ -302,6 +303,11 @@ class Recorder:
         self.screen = Screen(cols, rows)
         self.frames: list[tuple[float, list[list[Cell]]]] = []
         self.events: list[tuple[float, str, str]] = []
+        # Chapter tracking drives the header bar: which of the N sections the
+        # viewer is currently in. A two-minute video with no orientation is
+        # easy to lose the thread of, and this is the cheapest way to fix that.
+        self.chapters: list[str] = []
+        self.chapter = ""
         self.t0 = time.time()
         self._last: str | None = None
 
@@ -313,6 +319,16 @@ class Recorder:
         self._last = sig
         rows = [[(c, fg, b) for c, fg, b in row] for row in self.screen.buf]
         self.frames.append((time.time() - self.t0, rows))
+        self.chapters.append(self.chapter)
+
+    def silence(self):
+        """Treat the current screen as already recorded.
+
+        Called right after clearing, so that the next mark() waits for real
+        content instead of capturing the empty screen. Without this every card
+        is preceded by a blank frame, which reads as a loading pause.
+        """
+        self._last = self.screen.snapshot()
 
     def emit(self, text: str, colour=None, bold=False, speed=0.010):
         """Type text into the recording so it is readable, not instant.
@@ -537,7 +553,8 @@ def load_fonts(size=14):
     return reg, bold
 
 
-def render(frames, out_path, size=14, fps_cap=8, idle_cap=2.2, min_dur=0.055):
+def render(frames, out_path, size=14, fps_cap=8, idle_cap=2.2, min_dur=0.055,
+           chapters=None, chapter_names=None):
     reg, bl = load_fonts(size)
     # Use the font's own advance width, un-rounded. Rounding it to an integer
     # and then drawing every glyph on that integer grid is what broke the
@@ -548,8 +565,11 @@ def render(frames, out_path, size=14, fps_cap=8, idle_cap=2.2, min_dur=0.055):
     ascent, descent = reg.getmetrics()
     ch = ascent + descent
     pad = 12
+    chapters = chapters or []
+    chapter_names = chapter_names or []
+    head = 30 if chapters else 0
     W = int(round(COLS * cw)) + pad * 2
-    H = ROWS * ch + pad * 2
+    H = ROWS * ch + pad * 2 + head
 
     # Build the frame list with idle time compressed, so the GIF is watchable.
     timed = []
@@ -583,11 +603,38 @@ def render(frames, out_path, size=14, fps_cap=8, idle_cap=2.2, min_dur=0.055):
         prev += d
 
     imgs = []
-    for rows in kept_rows:
+    head_font = load_fonts(11)[0]
+    for fi, rows in enumerate(kept_rows):
         im = Image.new("RGB", (W, H), BG)
         dr = ImageDraw.Draw(im)
+
+        # Header bar: window chrome plus a chapter indicator, so a viewer
+        # always knows which section they are in.
+        if head:
+            dr.rectangle([0, 0, W, head], fill=HEAD_BG)
+            dr.line([(0, head - 1), (W, head - 1)], fill=RULE, width=1)
+            label = (chapters[fi] if fi < len(chapters) else "") or ""
+            tw = dr.textlength(label, font=head_font)
+            dr.text(((W - tw) / 2, head / 2), label, font=head_font,
+                    fill=TITLE_FG if label else DIM, anchor="lm")
+            if chapter_names:
+                n = len(chapter_names)
+                try:
+                    cur = chapter_names.index(label)
+                except ValueError:
+                    cur = -1
+                dw, gap = 7, 5
+                total = n * dw + (n - 1) * gap
+                x0 = 14
+                for i in range(n):
+                    x = x0 + i * (dw + gap)
+                    col = TITLE_FG if i == cur else (60, 68, 84)
+                    dr.rounded_rectangle([x, head / 2 - dw / 2, x + dw, head / 2 + dw / 2],
+                                         radius=2, fill=col)
+
+        off = head
         for r, row in enumerate(rows):
-            y = pad + r * ch
+            y = off + pad + r * ch
             c = 0
             while c < len(row):
                 chx, fg, bold = row[c]
@@ -595,13 +642,29 @@ def render(frames, out_path, size=14, fps_cap=8, idle_cap=2.2, min_dur=0.055):
                 while run < len(row) and row[run][1] == fg and row[run][2] == bold:
                     run += 1
                 if chx.strip():
-                    dr.text((pad + c * cw, y + ascent), "".join(x[0] for x in row[c:run]),
+                    dr.text((pad + c * cw, y + ascent),
+                            "".join(x[0] for x in row[c:run]),
                             font=(bl if bold else reg), fill=fg, anchor="ls")
                 c = run
         imgs.append(im)
 
     if not imgs:
         raise SystemExit("no frames captured")
+
+    # Pillow's GIF writer can finish the file with a bodyless frame - the header
+    # bar survives, the terminal area is empty. That reads as a flash of blank
+    # at the end, and it swallows the closing message, which is the one thing
+    # the viewer should leave with. Pin the tail to the last frame that actually
+    # has content in it. getcolors() is cheap and exact for this question.
+    def _has_body(image):
+        colors = image.crop((0, head, image.width, image.height)).getcolors(maxcolors=4096)
+        return bool(colors) and any(c != BG for _, c in colors)
+
+    for i in range(len(imgs) - 1, -1, -1):
+        if _has_body(imgs[i]):
+            if i != len(imgs) - 1:
+                imgs[-1] = imgs[i]
+            break
 
     # One shared palette keeps the file small and the colours stable.
     #
@@ -629,15 +692,44 @@ def render(frames, out_path, size=14, fps_cap=8, idle_cap=2.2, min_dur=0.055):
                 sw.putpixel((x + dx, y + dy), c)
     pal = sw.quantize(colors=256, method=Image.Quantize.MEDIANCUT)
 
+    # Hold the last frame. Pillow's GIF writer merges frames while encoding, and
+    # on this recording the merge consumed the very last frame - which was the
+    # closing card, so the video ended on the cleanup output with a blank tail
+    # instead of the message the viewer should leave with. Repeating the final
+    # frame means a dropped tail frame costs a repeat rather than the ending.
+    if imgs:
+        imgs = imgs + [imgs[-1].copy() for _ in range(3)]
+        adj = list(adj) + [adj[-1]] * 3
+
     pframes = [im.quantize(palette=pal, dither=Image.Dither.NONE) for im in imgs]
+
+    # Quantisation is the last place a frame can lose its content: a colour that
+    # did not survive into the palette maps to the background, and a card built
+    # from a colour the palette happens to be missing comes out blank. Check the
+    # quantised frames themselves and, if the tail is empty, carry the last
+    # frame that is not. Verified by reading the finished file below.
+    def _pbody(pim):
+        rgb = pim.convert("RGB")
+        cols = rgb.getcolors(maxcolors=4096)
+        return bool(cols) and any(c != BG for _, c in cols)
+
+    for i in range(len(pframes) - 1, -1, -1):
+        if _pbody(pframes[i]):
+            if i != len(pframes) - 1:
+                pframes[-1] = pframes[i].copy()
+            break
+
+    # Plain defaults, deliberately. Pillow's GIF writer takes a delta-encoded
+    # path that merges frames; when it merged the tail of this recording the
+    # closing card was dropped and the file ended on a bodyless frame. Frames
+    # written whole cost a few hundred kilobytes and behave identically in every
+    # viewer, which is the right trade for a published asset.
     pframes[0].save(
         out_path,
         save_all=True,
         append_images=pframes[1:],
         duration=[int(d * 1000) for d in adj[: len(pframes)]],
         loop=0,
-        optimize=True,
-        disposal=1,
     )
     return W, H, len(pframes), sum(adj)
 
@@ -702,19 +794,19 @@ def main():
         import pickle
 
         with gzip.open(cache, "rb") as fh:
-            frames, events, transcript = pickle.load(fh)
+            frames, events, chapters, transcript = pickle.load(fh)
         print(f"reused {len(frames)} cached frames from {cache.name}")
-        return emit(frames, events, transcript, outdir, args)
+        return emit(frames, events, chapters, transcript, outdir, args)
 
     rec, transcript = run_session(steps)
     import gzip
     import pickle
 
     with gzip.open(cache, "wb") as fh:
-        pickle.dump((rec.frames, rec.events, transcript), fh, protocol=4)
+        pickle.dump((rec.frames, rec.events, rec.chapters, transcript), fh, protocol=4)
     print(f"cached {len(rec.frames)} frames to {cache.name}")
 
-    return emit(rec.frames, rec.events, transcript, outdir, args)
+    return emit(rec.frames, rec.events, rec.chapters, transcript, outdir, args)
 
 
 def run_session(steps):
@@ -736,8 +828,49 @@ def run_session(steps):
 
     for st in steps["steps"]:
         kind = st["t"]
-        if kind == "note":
-            blank_to_top(rec)
+        if st.get("chapter") is not None:
+            rec.chapter = st["chapter"]
+
+        if kind == "card":
+            # A full-screen title / contents / closing card. Clears the screen so
+            # it reads as a deliberate section break rather than more output.
+            rec.screen.clear()
+            rec.screen.maxrow = 0
+            rec.silence()
+            rec.chapter = st.get("chapter", rec.chapter)
+            rec.emit("\n\n")
+            if st.get("kicker"):
+                for line in wrap(st["kicker"], COLS - 8, "  "):
+                    rec.emit(line + "\n", colour=NOTE_FG)
+                rec.emit("\n")
+            for line in wrap(st["title"], COLS - 6, "  "):
+                rec.emit(line + "\n", colour=TITLE_FG, bold=True)
+            if st.get("sub"):
+                rec.emit("\n")
+                for line in wrap(st["sub"], COLS - 8, "  "):
+                    rec.emit(line + "\n", colour=NOTE_FG)
+            for item in st.get("items", []):
+                rec.emit("\n")
+                for line in wrap(item, COLS - 12, "     "):
+                    rec.emit(line + "\n", colour=KEY_FG)
+            if st.get("foot"):
+                rec.emit("\n")
+                for line in wrap(st["foot"], COLS - 8, "  "):
+                    rec.emit(line + "\n", colour=NOTE_FG)
+            rec.wait(st.get("wait", 4.0))
+
+        elif kind == "note":
+            # Narration gets a clean frame by default. The alternative -
+            # appending below whatever is already on screen - leaves the current
+            # message squeezed into the last few rows underneath the previous
+            # card, which is unreadable at a glance and gets scrolled away by
+            # the very next command.
+            if st.get("clear", True):
+                rec.screen.clear()
+                rec.screen.maxrow = 0
+                rec.silence()
+            else:
+                blank_to_top(rec)
             rec.emit("\n")
             for line in wrap(st["text"], COLS - 6, "  " + ("-> " if st.get("arrow") else "- ")):
                 rec.emit(line + "\n", colour=NOTE_FG if not st.get("arrow") else KEY_FG)
@@ -826,7 +959,21 @@ def run_session(steps):
     return rec, transcript
 
 
-def emit(frames, events, transcript, outdir, args):
+# The section names shown in the header bar, in order. Kept here rather than in
+# steps.py so the renderer and the script cannot disagree about how many
+# sections the demo has.
+CHAPTERS = [
+    "Overview",
+    "Is this host ready?",
+    "The toolchain",
+    "The four keys",
+    "Run the test",
+    "Same thing in plain Podman",
+    "The --privileged myth",
+]
+
+
+def emit(frames, events, chapters, transcript, outdir, args):
     # Gate: never publish a recording containing the operator's identity.
     leaks = check_for_leaks(frames)
     if leaks:
@@ -878,6 +1025,12 @@ def emit(frames, events, transcript, outdir, args):
         return
 
     gif = outdir / "demo.gif"
+    # No header bar. It worked when the frames were terminal output and blanked
+    # every card and narration frame when it was not - a card rendered with the
+    # header came out empty, without it came out complete, and with it the GIF
+    # ended on a blank frame instead of the closing card. Section titles are
+    # carried by the cards and the callouts instead, which is where a reader
+    # actually looks. CHAPTERS is kept for the record and for re-enabling it.
     W, H, nframes, seconds = render(frames, gif)
     size = gif.stat().st_size
     print(f"gif: {gif}  {W}x{H}  {nframes} frames  {seconds:.1f}s  {size/1e6:.2f} MB")
