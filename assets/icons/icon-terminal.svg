@@ -1,0 +1,9 @@
+<!-- license: original work authored for the Molecule documentation site; released under CC0 1.0. See assets/ATTRIBUTION.md -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"
+     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+     stroke-linejoin="round" role="img" aria-label="terminal">
+  <title>Terminal</title>
+  <rect x="2" y="4" width="20" height="16" rx="2"/>
+  <path d="M7 9 L11 12 L7 15"/>
+  <path d="M14 15 L18 15"/>
+</svg>

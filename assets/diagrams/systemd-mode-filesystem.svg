@@ -1,0 +1,106 @@
+<!-- license: original work authored for the Molecule documentation site; released under CC0 1.0. See assets/ATTRIBUTION.md -->
+<!-- id: D-14 -->
+<!--
+TEXT ALTERNATIVE (lift this as the Markdown description, per VISUAL-SYSTEM.md 6.1):
+
+A tall box on the left is the container root filesystem, and inside it are five rows. Four of the
+rows are /run, /run/lock, /tmp and /var/lib/journal, and each of the four is labelled tmpfs on the
+right. A bracket collects those four rows and points to a note saying they are writable and live in
+memory. The fifth row is /sys/fs/cgroup, drawn with a heavier outline and labelled read-write on
+the right, with a note saying that is read-write because of the systemd-always flag. A warning box
+repeats the consequence of the flag being absent: the cgroup filesystem is read-only, systemd
+cannot create the control groups it needs, and the unit never starts. The picture therefore says
+that all five of these mounts exist only because the container was started with systemd as its
+init, and that the cgroup mount in particular is what lets systemd write cgroups at all.
+
+Short alt text: The container filesystem with four tmpfs mounts and a writable cgroup v2 mount,
+all of which exist only because the systemd-always flag was passed.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 400" width="720" height="400"
+     fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+     stroke-linejoin="round" role="img" aria-labelledby="d14-title d14-desc">
+  <title id="d14-title">What --systemd=always mounts, and why systemd can then write cgroups</title>
+  <desc id="d14-desc">The container root filesystem shown as five rows: /run, /run/lock, /tmp and
+  /var/lib/journal are each marked tmpfs, and /sys/fs/cgroup is marked read-write because of the
+  --systemd=always flag. A warning box states that without the flag the cgroup mount is read-only,
+  systemd cannot create control groups, and the unit never starts.</desc>
+  <style>
+    svg { color: #1f2328; }
+    text { font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    .fg     { color: #1f2328; }
+    .muted  { color: #59636e; }
+    .accent { color: #0969da; }
+    .warn   { color: #9a6700; }
+    .line   { stroke: #d1d9e0; }
+    .surface{ fill: #ffffff; }
+    .mk-fg     { fill: #1f2328; }
+    .mk-muted  { fill: #59636e; }
+    .mk-accent { fill: #0969da; }
+    @media (prefers-color-scheme: dark) {
+      svg { color: #e6edf3; }
+      .fg      { color: #e6edf3; }
+      .muted   { color: #9198a1; }
+      .accent  { color: #4493f8; }
+      .warn    { color: #d29922; }
+      .line    { stroke: #30363d; }
+      .surface { fill: #0d1117; }
+      .mk-fg     { fill: #e6edf3; }
+      .mk-muted  { fill: #9198a1; }
+      .mk-accent { fill: #4493f8; }
+    }
+  </style>
+  <defs>
+    <marker id="d14-mk-muted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" class="mk-muted"/>
+    </marker>
+  </defs>
+
+  <!-- ===== the container root filesystem ===== -->
+  <rect class="surface" x="24" y="40" width="440" height="326" rx="8" fill="none" stroke-width="2.5"/>
+  <text x="44" y="66" class="fg" font-size="14">container root filesystem</text>
+
+  <!-- four tmpfs rows -->
+  <rect x="44" y="84" width="400" height="48" rx="4" fill="none" class="line"/>
+  <text x="60" y="113" class="fg" font-size="14">/run</text>
+  <text x="428" y="113" class="muted" font-size="12" text-anchor="end">tmpfs</text>
+
+  <rect x="44" y="140" width="400" height="48" rx="4" fill="none" class="line"/>
+  <text x="60" y="169" class="fg" font-size="14">/run/lock</text>
+  <text x="428" y="169" class="muted" font-size="12" text-anchor="end">tmpfs</text>
+
+  <rect x="44" y="196" width="400" height="48" rx="4" fill="none" class="line"/>
+  <text x="60" y="225" class="fg" font-size="14">/tmp</text>
+  <text x="428" y="225" class="muted" font-size="12" text-anchor="end">tmpfs</text>
+
+  <rect x="44" y="252" width="400" height="48" rx="4" fill="none" class="line"/>
+  <text x="60" y="281" class="fg" font-size="14">/var/lib/journal</text>
+  <text x="428" y="281" class="muted" font-size="12" text-anchor="end">tmpfs</text>
+
+  <!-- the cgroup row: the one that matters -->
+  <rect x="44" y="308" width="400" height="48" rx="4" fill="none" class="surface accent" stroke-width="2.5"/>
+  <text x="60" y="337" class="fg" font-size="14">/sys/fs/cgroup</text>
+  <text x="428" y="337" class="accent" font-size="12" text-anchor="end">read-write</text>
+
+  <!-- bracket collecting the four tmpfs rows -->
+  <path d="M456 108 L456 276" fill="none" class="muted" stroke-width="1.5"/>
+  <path d="M456 108 L470 108" fill="none" class="muted" stroke-width="1.5"/>
+  <path d="M456 276 L470 276" fill="none" class="muted" stroke-width="1.5"/>
+  <path d="M470 192 L484 192" fill="none" class="muted" stroke-width="1.5" marker-end="url(#d14-mk-muted)"/>
+  <text x="492" y="180" class="fg" font-size="12">four tmpfs mounts</text>
+  <text x="492" y="198" class="muted" font-size="12">writable, and in memory</text>
+
+  <!-- the cgroup row gets its own callout -->
+  <path d="M456 332 L484 332" fill="none" class="muted" stroke-width="1.5" marker-end="url(#d14-mk-muted)"/>
+  <text x="492" y="328" class="fg" font-size="12">read-write, because of</text>
+  <text x="492" y="346" class="accent" font-size="12">--systemd=always</text>
+
+  <!-- the consequence of leaving the flag out -->
+  <rect x="492" y="212" width="204" height="88" rx="6" fill="none" class="warn"/>
+  <text x="506" y="236" class="warn" font-size="12">Without the flag:</text>
+  <text x="506" y="260" class="muted" font-size="12">/sys/fs/cgroup is read-only, so</text>
+  <text x="506" y="280" class="muted" font-size="12">systemd cannot start the unit.</text>
+
+  <!-- ===== bottom line ===== -->
+  <path d="M24 378 L696 378" fill="none" class="line" stroke-width="1.5"/>
+  <text x="24" y="394" class="muted" font-size="12">All five mounts exist only because the container was started with systemd as its init.</text>
+</svg>

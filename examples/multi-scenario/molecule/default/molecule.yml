@@ -1,0 +1,77 @@
+---
+# examples/multi-scenario/molecule/default/molecule.yml
+# The PLAIN scenario of the two-scenario project: no systemd anywhere in it.
+# Copied from examples/quickstart/molecule/default/molecule.yml (a verbatim copy of the
+# remediated REFERENCE-CONFIG.md section 2a), with the three keys below reduced to the
+# non-systemd form that section 2a's own comment recommends.  Nothing is trimmed.
+# KNOWN VARIANT, declared rather than silent: the image and the absent command /
+# override_command / systemd keys are not a byte-identical copy of any single block in
+# REFERENCE-CONFIG.md, because section 2a is the systemd-on-an-init-image shape.  The
+# requirement they satisfy -- an image with Python, no init needed -- is the one stated in
+# docs/authoring/custom-images.md.  See README.md section 5.
+driver:
+  name: podman
+  # safe_files:            # uncomment only if you have files worth keeping after `destroy`
+  #   - foo
+
+platforms:
+  - name: instance
+    # A plain non-systemd image. It must contain Python, because every
+    # `ansible.builtin` task runs Python on the target; bare `alpine` and
+    # `ubi9/ubi-minimal` cannot be a scenario image.
+    image: ghcr.io/ansible/community-ansible-dev-tools:latest
+    # Supply chain: `latest` is a moving tag -- two runs of this file are not the same build, and
+    # the registry decides what gets executed. OPTIONAL hardening, not required to run this:
+    # pin the digest you actually want with
+    #   podman image inspect --format '{{index .Digest}}' ghcr.io/ansible/community-ansible-dev-tools:latest
+    # then append `@sha256:...` to the `image:` line above.
+    # NO `command:`, NO `override_command:`, NO `systemd:`.
+    # `override_command` defaults to true in the podman driver, so the driver runs its own
+    # default command -- `bash -c "while true; do sleep 10000; done"` -- which is what keeps a
+    # non-init container alive for the length of the test. Setting `command: /sbin/init` here
+    # (as the sibling `systemd` scenario does) would be the bug, not the fix: this image has no
+    # init to run. `systemd: always` would make Podman expect one and the container would die.
+    privileged: false
+    # ---------------------------------------------------------------------------
+    # DOC BUG FIX 1 -- REQUIRED. Section 2a omits this. Molecule derives its groups
+    # from the platform (`platform.get("groups", ["ungrouped"])` in
+    # molecule/provisioner/ansible.py), so without it there is no "molecule" group and
+    # `hosts: molecule` in converge.yml/verify.yml matches nothing -- silently, with
+    # `molecule test` still exiting 0.
+    # It is per platform entry, not per file, so the sibling `systemd` scenario needs it too.
+    groups:
+      - molecule
+    # ---------------------------------------------------------------------------
+    # DEFECT DBG-5, and why this scenario looks the way it does.  The original section 2a was
+    # titled "quickstart, no systemd" and its first comment said "No systemd, no custom image",
+    # yet it set command: /sbin/init + override_command: true + systemd: always against
+    # ubi9/ubi-init, an image that CONTAINS systemd.  It was therefore a systemd scenario
+    # wearing a non-systemd label, and remediation corrected the title instead.
+    # This file is the other half of that decision: the genuinely non-systemd path the
+    # retitled section 2a refers to -- driver's default sleep loop, no `systemd:` key,
+    # `groups: [molecule]` kept. The beginner path (quickstart/) keeps the init image; a
+    # multi-scenario project needs both shapes side by side, which is what you are looking at.
+    # ---------------------------------------------------------------------------
+
+provisioner:
+  name: ansible
+  inventory:
+    host_vars:
+      instance:
+        ansible_connection: containers.podman.podman
+
+dependency:
+  name: galaxy
+  options:
+    requirements-file: ${MOLECULE_SCENARIO_DIRECTORY}/requirements.yml
+
+scenario:
+  test_sequence:
+    - dependency
+    - destroy
+    - create
+    - converge
+    - idempotence
+    - verify
+    - cleanup
+    - destroy

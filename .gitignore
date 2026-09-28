@@ -1,0 +1,24 @@
+# Internal research corpus and delivery working papers.
+#
+# NOT part of the published documentation. These files hold the verified research
+# corpus, the gate reports, and the delivery's problem-solving traces. They are
+# kept locally because they record internal process (subagent task IDs, local
+# absolute paths, a third-party username quoted from an upstream doc example).
+#
+# `PLAN.md` refers to `.research/` as a provenance path; those references are
+# code-span mentions, not hyperlinks, so excluding this directory creates no
+# broken links on GitHub.
+.research/
+
+# Local scratch
+*.log
+*.tmp
+*.swp
+.DS_Store
+
+# Nothing generated needs committing: the site builds with no toolchain.
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.pyc

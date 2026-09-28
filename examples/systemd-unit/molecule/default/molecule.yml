@@ -1,0 +1,66 @@
+---
+# examples/systemd-unit/molecule/default/molecule.yml
+# Verbatim copy of REFERENCE-CONFIG.md section 2b -- "molecule.yml - systemd in a container".
+# Canonical path per REFERENCE-CONFIG.md section 0. Molecule hard-requires the
+# `molecule/*/molecule.yml` glob, so the scenario lives in molecule/default/. Everything below
+# is character-for-character the canonical file, not tidied up: an executable proof of 2b.
+driver:
+  name: podman
+
+platforms:
+  - name: instance
+    # ---- Option A: use a prebuilt init image (recommended, nothing to build) ----
+    image: registry.access.redhat.com/ubi9/ubi-init:latest
+    # Supply chain: `latest` is a moving tag -- two runs of this file are not the same build, and
+    # the registry decides what gets executed. OPTIONAL hardening, not required to run this:
+    # pin the digest you actually want with
+    #   podman image inspect --format '{{index .Digest}}' registry.access.redhat.com/ubi9/ubi-init:latest
+    # then append `@sha256:...` to the `image:` line above.
+    # ---- Option B: build your own (uncomment the three lines below, and set
+    #      `image` to a base WITHOUT systemd, e.g. debian:bookworm-slim) ----
+    # pre_build_image: false          # MANDATORY: the default is `true`, which silently
+    #                                 # skips the build. `item.image` above is the FROM line.
+    # dockerfile: Dockerfile.j2       # optional; Dockerfile.j2 in the scenario dir is the default
+    command: /sbin/init
+    override_command: true
+    systemd: always
+    privileged: false
+    # ---------------------------------------------------------------------------
+    # DOC BUG FIX -- REQUIRED. REFERENCE-CONFIG 2b omits this line and the example
+    # then does NOT WORK: molecule builds its Ansible groups from this list
+    # (molecule/provisioner/ansible.py: `for group in platform.get("groups", ["ungrouped"])`)
+    # and the default is ["ungrouped"]. There is therefore NO "molecule" group, so
+    # `hosts: molecule` in converge.yml/verify.yml matches nothing and every play
+    # reports "skipping: no hosts matched" -- while `molecule test` still exits 0.
+    # That is a silent false pass: zero assertions run. Add this line.
+    groups:
+      - molecule
+    # Only uncomment when a unit genuinely needs it (PrivateTmp=, ProtectSystem=,
+    # ProtectHome=, PrivateNetwork=, ReadWriteDirectories=, InaccessibleDirectories=).
+    # systemd's own docs say do NOT drop CAP_SYS_ADMIN or CAP_MKNOD; Podman's defaults
+    # include neither, so add only the one you need.
+    # capabilities:
+    #   - SYS_ADMIN
+
+provisioner:
+  name: ansible
+  inventory:
+    host_vars:
+      instance:
+        ansible_connection: containers.podman.podman
+
+dependency:
+  name: galaxy
+  options:
+    requirements-file: ${MOLECULE_SCENARIO_DIRECTORY}/requirements.yml
+
+scenario:
+  test_sequence:
+    - dependency
+    - destroy
+    - create
+    - converge
+    - idempotence
+    - verify
+    - cleanup
+    - destroy

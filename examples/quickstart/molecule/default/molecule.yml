@@ -1,0 +1,74 @@
+---
+# examples/quickstart/molecule/default/molecule.yml
+# Verbatim copy of the remediated REFERENCE-CONFIG.md section 2a -- "molecule.yml - quickstart
+# (no build; runs a prebuilt init image)".  Section 2a was retitled during remediation because,
+# as originally shipped, it was titled "no systemd" while setting `systemd: always` on an image
+# that contains systemd (defect DBG-5).  The realistic beginner path needs an init image, so the
+# honest title is "no build" rather than "no systemd".  Nothing here is trimmed.
+driver:
+  name: podman
+  # safe_files:            # uncomment only if you have files worth keeping after `destroy`
+  #   - foo
+
+platforms:
+  - name: instance
+    image: registry.access.redhat.com/ubi9/ubi-init:latest
+    # Supply chain: `latest` is a moving tag -- two runs of this file are not the same build, and
+    # the registry decides what gets executed. OPTIONAL hardening, not required to run this:
+    # pin the digest you actually want with
+    #   podman image inspect --format '{{index .Digest}}' registry.access.redhat.com/ubi9/ubi-init:latest
+    # then append `@sha256:...` to the `image:` line above.
+    # `ubi9/ubi-init` already contains systemd, Python and /sbin/init, so nothing
+    # needs building. See REFERENCE-CONFIG.md section 1.3.
+    # For a plain non-systemd image you could use ghcr.io/ansible/community-ansible-dev-tools:latest
+    # (it must contain Python) - but it is configured as a NON-init instance, so keep
+    # `command:` as the driver's default sleep and do NOT set `systemd:`.
+    command: /sbin/init
+    override_command: true
+    systemd: always
+    privileged: false
+    # ---------------------------------------------------------------------------
+    # DOC BUG FIX 1 -- REQUIRED. Section 2a omits this. Molecule derives its groups
+    # from the platform (`platform.get("groups", ["ungrouped"])` in
+    # molecule/provisioner/ansible.py), so without it there is no "molecule" group and
+    # `hosts: molecule` in converge.yml/verify.yml matches nothing -- silently, with
+    # `molecule test` still exiting 0.
+    groups:
+      - molecule
+    # ---------------------------------------------------------------------------
+    # DEFECT DBG-5, resolved by retitling rather than by re-engineering.  The original
+    # section 2a was titled "quickstart, no systemd" and its first comment said
+    # "No systemd, no custom image", yet it set command: /sbin/init + override_command: true
+    # + systemd: always against ubi9/ubi-init, an image that CONTAINS systemd.  It was
+    # therefore a systemd scenario wearing a non-systemd label.
+    # Remediation decision: KEEP the init image and correct the title.  A beginner needs an
+    # image with systemd and Python already present, and building one first would put a
+    # second hard problem in front of them before they have run a single test.
+    # If you specifically want the non-systemd path (driver's default sleep loop, no
+    # `systemd:` key), that is documented in docs/authoring/custom-images.md -- switch
+    # `image` to ghcr.io/ansible/community-ansible-dev-tools:latest, delete the command /
+    # override_command / systemd keys, and keep `groups: [molecule]`.
+    # ---------------------------------------------------------------------------
+
+provisioner:
+  name: ansible
+  inventory:
+    host_vars:
+      instance:
+        ansible_connection: containers.podman.podman
+
+dependency:
+  name: galaxy
+  options:
+    requirements-file: ${MOLECULE_SCENARIO_DIRECTORY}/requirements.yml
+
+scenario:
+  test_sequence:
+    - dependency
+    - destroy
+    - create
+    - converge
+    - idempotence
+    - verify
+    - cleanup
+    - destroy

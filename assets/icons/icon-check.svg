@@ -1,0 +1,7 @@
+<!-- license: original work authored for the Molecule documentation site; released under CC0 1.0. See assets/ATTRIBUTION.md -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"
+     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+     stroke-linejoin="round" role="img" aria-label="pass">
+  <title>Pass</title>
+  <path d="M5 13 L10 17 L19 8"/>
+</svg>

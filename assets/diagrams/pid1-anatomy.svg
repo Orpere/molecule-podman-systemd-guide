@@ -1,0 +1,127 @@
+<!-- license: original work authored for the Molecule documentation site; released under CC0 1.0. See assets/ATTRIBUTION.md -->
+<!-- id: D-04 -->
+<!--
+TEXT ALTERNATIVE (lift this as the Markdown description, per VISUAL-SYSTEM.md 6.1):
+
+A cross-section with the host on the left and one container on the right. On the host, at the
+top, sits the host kernel, which every container shares. Below it is your own shell, where you
+type. Below that is the podman CLI, which is the only route in: an arrow runs from your shell to
+the podman CLI, and a second arrow leaves the podman CLI, crosses the container boundary, and
+lands on a shell inside the container. Inside the container, at the very top, is /sbin/init
+labelled PID 1, and the label says this is what started the container. Below PID 1 the process
+tree fans out to systemd and then to demo.service, and below those sits the box highlighted as
+your exec shell, labelled as somewhere podman exec put you and as PID 42, a child of PID 1 and
+not PID 1 itself. The point the picture makes is that the shell you see when you podman exec is
+not the process that started the container: commands reach it through the podman CLI on the
+host, not by walking up the process tree, and PID 1 is above your shell rather than being your
+shell.
+
+Short alt text: Cross-section of the host and one container, showing that the shell podman exec
+gives you is not PID 1.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420" width="720" height="420"
+     fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+     stroke-linejoin="round" role="img" aria-labelledby="d04-title d04-desc">
+  <title id="d04-title">PID 1 anatomy: what podman exec gives you is not what started the container</title>
+  <desc id="d04-desc">Cross-section with the host kernel, your shell and the podman CLI on the host
+  on the left; /sbin/init as PID 1 at the top of the container on the right, its process tree below
+  it, and the podman exec shell highlighted at the bottom of that tree. The only path in is the
+  podman CLI arrow crossing the container boundary.</desc>
+  <style>
+    svg { color: #1f2328; }
+    text { font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    .fg     { color: #1f2328; }
+    .muted  { color: #59636e; }
+    .accent { color: #0969da; }
+    .line   { stroke: #d1d9e0; }
+    .surface{ fill: #ffffff; }
+    .mk-fg     { fill: #1f2328; }
+    .mk-muted  { fill: #59636e; }
+    .mk-accent { fill: #0969da; }
+    @media (prefers-color-scheme: dark) {
+      svg { color: #e6edf3; }
+      .fg      { color: #e6edf3; }
+      .muted   { color: #9198a1; }
+      .accent  { color: #4493f8; }
+      .line    { stroke: #30363d; }
+      .surface { fill: #0d1117; }
+      .mk-fg     { fill: #e6edf3; }
+      .mk-muted  { fill: #9198a1; }
+      .mk-accent { fill: #4493f8; }
+    }
+  </style>
+  <defs>
+    <marker id="d04-mk-fg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" class="mk-fg"/>
+    </marker>
+    <marker id="d04-mk-muted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" class="mk-muted"/>
+    </marker>
+    <marker id="d04-mk-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" class="mk-accent"/>
+    </marker>
+  </defs>
+
+  <!-- region labels -->
+  <text x="24" y="28" class="muted" font-size="12">HOST</text>
+  <text x="358" y="66" class="muted" font-size="12">CONTAINER</text>
+
+  <!-- ===== host kernel ===== -->
+  <rect class="surface" x="24" y="40" width="250" height="104" rx="6" fill="none"/>
+  <text x="40" y="74" class="fg" font-size="14">host kernel</text>
+  <text x="40" y="98" class="muted" font-size="12">shared by every container</text>
+  <text x="40" y="120" class="muted" font-size="12">cgroups &#183; namespaces &#183; storage</text>
+
+  <!-- ===== your shell (host) ===== -->
+  <rect class="surface" x="24" y="176" width="250" height="72" rx="6" fill="none"/>
+  <text x="40" y="208" class="fg" font-size="14">your shell</text>
+  <text x="40" y="230" class="muted" font-size="12">you type here</text>
+
+  <!-- ===== podman CLI ===== -->
+  <rect class="surface" x="24" y="300" width="250" height="80" rx="6" fill="none"/>
+  <text x="40" y="332" class="fg" font-size="14">podman CLI</text>
+  <text x="40" y="354" class="accent" font-size="12">podman exec</text>
+
+  <!-- your shell -> podman CLI -->
+  <path d="M149 252 L149 292" fill="none" class="muted" marker-end="url(#d04-mk-muted)"/>
+
+  <!-- ===== container boundary ===== -->
+  <rect x="340" y="40" width="356" height="340" rx="8" fill="none" class="line"
+        stroke-width="1.5" stroke-dasharray="6 4"/>
+
+  <!-- ===== PID 1 ===== -->
+  <rect class="surface" x="356" y="76" width="324" height="80" rx="6" fill="none" stroke-width="2.5"/>
+  <circle class="accent" cx="382" cy="106" r="14" fill="none"/>
+  <text x="382" y="111" class="accent" font-size="14" text-anchor="middle">1</text>
+  <text x="406" y="102" class="fg" font-size="15">/sbin/init</text>
+  <text x="406" y="126" class="muted" font-size="12">PID 1 &#8212; what started the container</text>
+
+  <!-- init fans out -->
+  <path d="M518 156 L518 180" fill="none" class="muted" marker-end="url(#d04-mk-muted)"/>
+
+  <!-- process tree -->
+  <rect class="surface" x="356" y="188" width="152" height="52" rx="4" fill="none"/>
+  <text x="432" y="220" class="fg" font-size="13" text-anchor="middle">systemd</text>
+  <path d="M508 214 L520 214" fill="none" class="muted" marker-end="url(#d04-mk-muted)"/>
+  <rect class="surface" x="528" y="188" width="152" height="52" rx="4" fill="none"/>
+  <text x="604" y="220" class="fg" font-size="13" text-anchor="middle">demo.service</text>
+
+  <path d="M432 240 L432 262" fill="none" class="muted" marker-end="url(#d04-mk-muted)"/>
+  <path d="M604 240 L604 262" fill="none" class="muted" marker-end="url(#d04-mk-muted)"/>
+
+  <!-- ===== the exec shell: the thing the reader is looking for ===== -->
+  <rect x="356" y="270" width="324" height="96" rx="6" fill="none"
+        class="surface accent" stroke-width="2.5"/>
+  <text x="376" y="300" class="fg" font-size="15">your exec shell</text>
+  <text x="376" y="324" class="accent" font-size="12">podman exec put you here</text>
+  <text x="376" y="346" class="muted" font-size="12">PID 42 &#8212; a child of PID 1, not PID 1</text>
+
+  <!-- ===== the only way in: podman CLI crosses the boundary ===== -->
+  <path d="M278 340 L348 340" fill="none" class="accent" stroke-width="2.5" marker-end="url(#d04-mk-accent)"/>
+  <text x="300" y="314" class="accent" font-size="12" text-anchor="middle">the only</text>
+  <text x="300" y="328" class="accent" font-size="12" text-anchor="middle">way in</text>
+
+  <!-- ===== bottom line ===== -->
+  <path d="M24 392 L696 392" fill="none" class="line" stroke-width="1.5"/>
+  <text x="24" y="410" class="muted" font-size="12">Command path: your shell &#8594; podman CLI &#8594; your exec shell. PID 1 is above your shell; it is not your shell.</text>
+</svg>

@@ -1,0 +1,20 @@
+---
+# examples/multi-scenario/molecule/default/cleanup.yml
+# Copied from examples/quickstart/molecule/default/cleanup.yml, which was WRITTEN BY HAND --
+# `molecule init scenario` (molecule 26.9.0) creates only five files (molecule.yml, converge.yml,
+# verify.yml, create.yml, destroy.yml) and cleanup.yml is not one of them. Verified by running it.
+# The `cleanup` step appears TWICE in the canonical test_sequence (REFERENCE-CONFIG 9.2) but
+# REFERENCE-CONFIG ships no content for it, so molecule reports
+# "Missing playbook (Remove from test_sequence to suppress)". This file closes that gap.
+- name: Cleanup
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  # no_log: "{{ molecule_no_log }}"
+  tasks:
+    # Developer must implement. Usually: remove files/directories created during the run.
+
+    - name: Remove the instance config file
+      ansible.builtin.file:
+        path: "{{ molecule_instance_config }}"
+        state: absent

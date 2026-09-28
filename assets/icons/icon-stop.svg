@@ -1,0 +1,8 @@
+<!-- license: original work authored for the Molecule documentation site; released under CC0 1.0. See assets/ATTRIBUTION.md -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"
+     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+     stroke-linejoin="round" role="img" aria-label="fail">
+  <title>Fail</title>
+  <path d="M5 2 L19 2 L22 5 L22 19 L19 22 L5 22 L2 19 L2 5 Z"/>
+  <path d="M8 12 L16 12"/>
+</svg>

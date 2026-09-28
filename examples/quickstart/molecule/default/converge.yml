@@ -1,0 +1,19 @@
+---
+# examples/quickstart/molecule/default/converge.yml
+# Verbatim copy of REFERENCE-CONFIG.md section 3.1 -- "converge.yml - quickstart".
+# (Needs no `groups` fix of its own: the `groups: [molecule]` platform key lives in
+# molecule.yml. Without it this play matches no hosts and passes vacuously.)
+- name: Converge
+  hosts: molecule
+  gather_facts: false
+  tasks:
+    - name: Write a marker file
+      ansible.builtin.copy:
+        dest: /tmp/molecule-was-here
+        content: "hello from molecule\n"
+        mode: "0644"
+
+    - name: Read the marker file back
+      ansible.builtin.stat:
+        path: /tmp/molecule-was-here
+      register: marker

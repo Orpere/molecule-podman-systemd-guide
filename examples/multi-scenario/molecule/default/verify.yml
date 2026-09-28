@@ -1,0 +1,31 @@
+---
+# examples/quickstart/molecule/default/verify.yml
+# Verbatim copy of REFERENCE-CONFIG.md section 3.3 -- "verify.yml - quickstart".
+- name: Verify
+  hosts: molecule
+  gather_facts: false
+  tasks:
+    - name: Read the marker file back
+      ansible.builtin.stat:
+        path: /tmp/molecule-was-here
+      register: marker
+
+    - name: Assert the marker file exists and has the right content
+      ansible.builtin.assert:
+        that:
+          - marker.stat.exists
+          - marker.stat.checksum is defined
+        fail_msg: The marker file is missing. Converge did not run.
+        success_msg: The marker file is there.
+
+    - name: Assert the file content
+      ansible.builtin.slurp:
+        src: /tmp/molecule-was-here
+      register: marker_content
+
+    - name: Check the content
+      ansible.builtin.assert:
+        that:
+          - "'hello from molecule' in (marker_content.content | b64decode)"
+        fail_msg: Unexpected content in the marker file.
+        success_msg: The content is correct.

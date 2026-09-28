@@ -1,0 +1,57 @@
+---
+# examples/multi-scenario/molecule/systemd/converge.yml
+# Copied from examples/systemd-unit/molecule/default/converge.yml, itself a verbatim copy of
+# REFERENCE-CONFIG.md section 3.2 -- "converge.yml - systemd (with boot wait)".
+- name: Converge
+  hosts: molecule
+  gather_facts: false
+  tasks:
+    - name: Wait for systemd to finish booting
+      ansible.builtin.wait_for:
+        path: /run/systemd/system
+        # DOC BUG FIX -- REQUIRED. REFERENCE-CONFIG 3.2 says `state: directory`, which is a
+        # FATAL error on ansible-core 2.21.4:
+        #   value of state must be one of: absent, drained, present, started, stopped,
+        #   got: directory
+        # ansible-core removed the `directory` / `file` / `socket` states from `wait_for`;
+        # the string "directory" no longer appears in the module at all. For a path, the
+        # "the path exists" test is now spelled `present` (`started`, the default, is the
+        # same test). Use `present`.
+        state: present
+        timeout: 30
+
+    - name: Wait for systemd to settle (running or degraded)
+      ansible.builtin.command: systemctl is-system-running --wait
+      register: sysstate
+      retries: 10
+      delay: 3
+      until: sysstate.stdout in ['running', 'degraded']
+      changed_when: false
+      failed_when: false   # 'degraded' returns rc 1; do not hard-fail here
+
+    - name: Install the test service under test
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/molecule-demo.service
+        mode: "0644"
+        content: |
+          [Unit]
+          Description=Molecule demo service
+          After=network.target
+
+          [Service]
+          Type=simple
+          ExecStart=/bin/sh -c 'while true; do sleep 5; done'
+          Restart=on-failure
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Reload systemd so it sees the new unit
+      ansible.builtin.systemd:
+        daemon_reload: true
+
+    - name: Start and enable the test service
+      ansible.builtin.systemd:
+        name: molecule-demo.service
+        state: started
+        enabled: true

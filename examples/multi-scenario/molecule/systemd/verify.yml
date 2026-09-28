@@ -1,0 +1,56 @@
+---
+# examples/multi-scenario/molecule/systemd/verify.yml
+# Copied from examples/systemd-unit/molecule/default/verify.yml, itself a verbatim copy of
+# REFERENCE-CONFIG.md section 7.2 -- "The playbook".
+# Proves: (1) systemd is PID 1, (2) the test service is active.
+- name: Verify systemd and the test service
+  hosts: molecule
+  gather_facts: false
+  tasks:
+    - name: Read what PID 1 is
+      ansible.builtin.command: cat /proc/1/comm
+      register: pid1
+      changed_when: false
+
+    - name: Confirm systemd is the top process
+      ansible.builtin.assert:
+        that:
+          - pid1.stdout | trim == 'systemd' or pid1.stdout | trim == 'init'
+        fail_msg: >-
+          PID 1 is '{{ pid1.stdout | trim }}', not systemd.
+          Check that `command: /sbin/init`, `override_command: true` and
+          `systemd: always` are all set in molecule.yml.
+        success_msg: systemd is PID 1.
+
+    - name: Read the container UUID that Podman sets in systemd mode
+      ansible.builtin.command: cat /proc/1/environ
+      register: pid1_environ
+      changed_when: false
+      failed_when: false
+
+    - name: Collect the instance's service facts
+      ansible.builtin.service_facts:
+
+    - name: Confirm systemd is running the managed service
+      ansible.builtin.assert:
+        that:
+          - "'molecule-demo.service' in ansible_facts.services"
+          - "ansible_facts.services['molecule-demo.service'].state == 'running'"
+        fail_msg: molecule-demo.service is not running inside the container.
+        success_msg: molecule-demo.service is active.
+
+    - name: Show the systemd state and any failed units (diagnostic, non-fatal)
+      # DOC BUG FIX -- REQUIRED. REFERENCE-CONFIG 7.2 uses `ansible.builtin.command` with a
+      # `;`-joined compound string. `command` does NOT run a shell, so it tries to exec a
+      # binary literally named "systemctl is-system-running; systemctl --failed ...",
+      # fails, and -- because failed_when is false -- the failure is swallowed. The task then
+      # reports `sd.stdout_lines: []`, which is NOT the sample output REFERENCE-CONFIG 7.2
+      # promises. `ansible.builtin.shell` is the module that can honour `;` and `||`.
+      ansible.builtin.shell: "systemctl is-system-running; systemctl --failed --no-pager || true"
+      register: sd
+      changed_when: false
+      failed_when: false
+
+    - name: Print the diagnostics
+      ansible.builtin.debug:
+        var: sd.stdout_lines

@@ -1,0 +1,42 @@
+/* license: CC0 1.0 Universal (SPDX-License-Identifier: CC0-1.0)
+   Authored for this project and dedicated to the public domain. Recorded in
+   assets/ATTRIBUTION.md section 1.  This file uses a CSS block comment rather than the
+   HTML comment the SVGs carry, because CSS and SVG do not share a comment syntax. */
+
+/* The ONLY place a colour value is written down in this project.
+   The eight tokens below are GitHub's own light/dark primitives, so a house graphic inherits
+   GitHub's theme with no prefers-color-scheme media query of our own and cannot drift out of
+   step with the page it sits on.  Source of truth: docs/VISUAL-SYSTEM.md section 3.1.
+   Every token clears 4.5:1 contrast against both --surface values.  */
+
+:root {
+  /* Primary stroke / body text. */
+  --fg: #1f2328;
+  /* Secondary stroke, captions. Never for anything that must be read. */
+  --fg-muted: #59636e;
+  /* Links, active state, the one highlight per diagram. More than one per diagram is a bug. */
+  --accent: #0969da;
+  /* PASS, verified, success. Never for decoration. */
+  --ok: #1a7f37;
+  /* WARN, staleness, "works but". Never for errors. */
+  --warn: #9a6700;
+  /* FAIL, folklore callouts, prohibitions. Never decorative. */
+  --danger: #cf222e;
+  /* Diagram background behind a badge. */
+  --surface: #ffffff;
+  /* Hairlines, grid, badge edges. */
+  --border: #d1d9e0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fg: #e6edf3;
+    --fg-muted: #9198a1;
+    --accent: #4493f8;
+    --ok: #3fb950;
+    --warn: #d29922;
+    --danger: #f85149;
+    --surface: #0d1117;
+    --border: #30363d;
+  }
+}

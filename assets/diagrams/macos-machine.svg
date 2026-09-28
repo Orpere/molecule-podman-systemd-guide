@@ -1,0 +1,100 @@
+<!-- license: original work authored for the Molecule documentation site; released under CC0 1.0. See assets/ATTRIBUTION.md -->
+<!-- id: D-09 -->
+<!--
+The host layer drawn below is a plain rounded rectangle carrying the word "macOS" and nothing
+else. A plain text label in our own drawing is a textual acknowledgement, which is the only
+permitted form for this mark. Do not "improve" it with a logo, a laptop, window chrome, or a
+device silhouette. See the refusal row for macOS in assets/ATTRIBUTION.md.
+
+TEXT ALTERNATIVE (lift this as the Markdown description, per VISUAL-SYSTEM.md 6.1):
+
+Three layers stacked on top of each other, read from the top down. The top layer is a single box
+labelled container, running some Linux distribution of your choice. The middle layer is a dashed
+box labelled the podman machine, a Fedora CoreOS virtual machine, and the note under it says it
+has its own Linux kernel with systemd, cgroups v2 and SELinux. The bottom layer is a wide plain
+box labelled macOS, your laptop, and that is where the podman CLI runs. An accent arrow labelled
+the podman CLI starts inside the macOS layer and rises up into the podman machine, crossing the
+boundary between them, which is the point of the picture: the containers do not run natively on
+macOS, they run inside a Linux virtual machine, and the podman command is a remote control that
+reaches into that machine. The line joining the container to the machine says they share a
+kernel; the line joining the machine to macOS says the machine is virtualised by it.
+
+Short alt text: Three stacked layers showing a container running inside a podman machine
+virtual machine on macOS, with the podman CLI as a remote control.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 360" width="720" height="360"
+     fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+     stroke-linejoin="round" role="img" aria-labelledby="d09-title d09-desc">
+  <title id="d09-title">Three layers: container, podman machine, macOS host</title>
+  <desc id="d09-desc">A container at the top, a dashed podman machine box holding a Fedora CoreOS
+  Linux virtual machine in the middle, and a plain rounded rectangle labelled macOS at the bottom.
+  An arrow labelled the podman CLI leaves the macOS layer and rises into the podman machine,
+  showing that the podman command is a remote control and that containers do not run natively on
+  macOS.</desc>
+  <style>
+    svg { color: #1f2328; }
+    text { font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    .fg     { color: #1f2328; }
+    .muted  { color: #59636e; }
+    .accent { color: #0969da; }
+    .line   { stroke: #d1d9e0; }
+    .surface{ fill: #ffffff; }
+    .mk-fg     { fill: #1f2328; }
+    .mk-muted  { fill: #59636e; }
+    .mk-accent { fill: #0969da; }
+    @media (prefers-color-scheme: dark) {
+      svg { color: #e6edf3; }
+      .fg      { color: #e6edf3; }
+      .muted   { color: #9198a1; }
+      .accent  { color: #4493f8; }
+      .line    { stroke: #30363d; }
+      .surface { fill: #0d1117; }
+      .mk-fg     { fill: #e6edf3; }
+      .mk-muted  { fill: #9198a1; }
+      .mk-accent { fill: #4493f8; }
+    }
+  </style>
+  <defs>
+    <marker id="d09-mk-muted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" class="mk-muted"/>
+    </marker>
+    <marker id="d09-mk-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 Z" class="mk-accent"/>
+    </marker>
+  </defs>
+
+  <!-- ===== layer 1: the container ===== -->
+  <rect class="surface" x="250" y="40" width="220" height="76" rx="6" fill="none"/>
+  <text x="360" y="70" class="fg" font-size="15" text-anchor="middle">container</text>
+  <text x="360" y="94" class="muted" font-size="12" text-anchor="middle">your Linux image</text>
+
+  <!-- container <-> machine: shared kernel -->
+  <path d="M360 120 L360 146" fill="none" class="muted"
+        marker-start="url(#d09-mk-muted)" marker-end="url(#d09-mk-muted)"/>
+  <text x="374" y="138" class="muted" font-size="12">shares one kernel</text>
+
+  <!-- ===== layer 2: the podman machine (a Linux virtual machine) ===== -->
+  <rect x="110" y="150" width="580" height="88" rx="8" fill="none" class="line"
+        stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="130" y="178" class="fg" font-size="15">podman machine</text>
+  <text x="130" y="202" class="muted" font-size="12">Fedora CoreOS virtual machine &#8212; its own Linux kernel, systemd, cgroups v2</text>
+  <text x="130" y="222" class="muted" font-size="12">many containers live in this one machine</text>
+
+  <!-- machine <-> host: virtualised by -->
+  <path d="M300 242 L300 268" fill="none" class="muted"
+        marker-start="url(#d09-mk-muted)" marker-end="url(#d09-mk-muted)"/>
+  <text x="314" y="260" class="muted" font-size="12">virtualised by</text>
+
+  <!-- ===== layer 3: the host: a plain labelled rectangle, no vendor artwork ===== -->
+  <rect class="surface" x="30" y="272" width="660" height="72" rx="6" fill="none"/>
+  <text x="50" y="302" class="fg" font-size="15">macOS</text>
+  <text x="50" y="326" class="muted" font-size="12">your laptop &#8212; the podman CLI is the only thing you install here</text>
+
+  <!-- ===== the podman CLI crosses from the host up into the machine ===== -->
+  <path d="M620 300 L620 204" fill="none" class="accent" stroke-width="2.5"
+        marker-end="url(#d09-mk-accent)"/>
+  <text x="606" y="262" class="accent" font-size="12" text-anchor="end">podman CLI</text>
+  <text x="606" y="280" class="muted" font-size="12" text-anchor="end">a remote control,</text>
+  <text x="606" y="298" class="muted" font-size="12" text-anchor="end">not a local process</text>
+
+</svg>

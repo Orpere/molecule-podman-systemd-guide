@@ -1,0 +1,9 @@
+---
+# examples/quickstart/molecule/default/requirements.yml
+# Verbatim copy of REFERENCE-CONFIG.md section 4.
+collections:
+  - name: containers.podman
+    # EXACT, not a range (supply chain): ">=1.10.0" resolves to whatever is newest on the day
+    # you run it, so two runs of this project execute different code under the same commit.
+    # 1.20.2 is the version these examples were actually run and verified against.
+    version: "1.20.2"

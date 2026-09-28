@@ -1,0 +1,8 @@
+<!-- license: original work authored for the Molecule documentation site; released under CC0 1.0. See assets/ATTRIBUTION.md -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"
+     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+     stroke-linejoin="round" role="img" aria-label="cross-reference">
+  <title>Cross-reference</title>
+  <rect x="2.5" y="9" width="12" height="6" rx="3" transform="rotate(-45 8.5 12)"/>
+  <rect x="9.5" y="9" width="12" height="6" rx="3" transform="rotate(-45 15.5 12)"/>
+</svg>

@@ -1,0 +1,20 @@
+<!-- license: original work authored for the Molecule documentation site; released under CC0 1.0. -->
+<!-- class: TEXT-ONLY platform badge. Contains no third-party artwork: the word in our own frame. -->
+<!-- PROHIBITED: no vendor-owned graphic of any kind, any size, on or in connection with websites. -->
+<!-- A plain text label in our own frame is a textual acknowledgement, which is the permitted form. -->
+<!-- Page must print: macOS is a trademark of the vendor. See assets/ATTRIBUTION.md row 7. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 32" width="120" height="32"
+     role="img" aria-label="macOS">
+  <title>macOS</title>
+  <style>
+    .bg { fill: #ffffff; stroke: #d1d9e0; }
+    .fg { fill: #1f2328; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #0d1117; stroke: #30363d; }
+      .fg { fill: #e6edf3; }
+    }
+    text { font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 14px; }
+  </style>
+  <rect class="bg" x="0.5" y="0.5" width="119" height="31" rx="6"/>
+  <text class="fg" x="12" y="21">macOS</text>
+</svg>

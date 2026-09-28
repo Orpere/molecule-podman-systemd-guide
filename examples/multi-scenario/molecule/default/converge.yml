@@ -1,0 +1,23 @@
+---
+# examples/multi-scenario/molecule/default/converge.yml
+# Copied from examples/quickstart/molecule/default/converge.yml, which is a verbatim copy
+# of REFERENCE-CONFIG.md section 3.1 -- "converge.yml - quickstart".
+# Nothing here is systemd-aware, so this same file also runs, unchanged, in the sibling
+# `systemd` scenario: the only difference between the two scenarios is the image and the
+# three systemd keys in molecule.yml, not the tasks. That is the point of the example.
+# (Needs no `groups` fix of its own: the `groups: [molecule]` platform key lives in
+# molecule.yml. Without it this play matches no hosts and passes vacuously.)
+- name: Converge
+  hosts: molecule
+  gather_facts: false
+  tasks:
+    - name: Write a marker file
+      ansible.builtin.copy:
+        dest: /tmp/molecule-was-here
+        content: "hello from molecule\n"
+        mode: "0644"
+
+    - name: Read the marker file back
+      ansible.builtin.stat:
+        path: /tmp/molecule-was-here
+      register: marker

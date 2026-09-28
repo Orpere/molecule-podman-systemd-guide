@@ -1,0 +1,10 @@
+<!-- license: original work authored for the Molecule documentation site; released under CC0 1.0. See assets/ATTRIBUTION.md -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"
+     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+     stroke-linejoin="round" role="img" aria-label="secret">
+  <title>Secret</title>
+  <circle cx="8" cy="8" r="5"/>
+  <path d="M11.5 11.5 L20 20"/>
+  <path d="M15 15 L18 12"/>
+  <path d="M18 18 L21 15"/>
+</svg>
